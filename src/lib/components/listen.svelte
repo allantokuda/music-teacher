@@ -30,9 +30,9 @@
       let indices = freqs.map((f) => indexOfFreq(f))
       let fft = new Tone.FFT(16384)
       let mic = new Tone.UserMedia()
+      Tone.start()
       mic.open().then(() => {
         mic.connect(fft)
-        Tone.Transport.start()
         setInterval(() => {
           let all_gains = fft.getValue();
           values = indices.map((i) => all_gains[i]);
