@@ -36,7 +36,7 @@
         setInterval(() => {
           let all_gains = fft.getValue();
           values = indices.map((i) => all_gains[i]);
-        }, 50)
+        }, 10)
       })
     }
   }
