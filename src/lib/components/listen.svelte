@@ -3,6 +3,8 @@
   import { browser } from '$app/environment';
 
   let fft_gains = []
+  let fft_gains_prev = []
+  let fft_diffs = []
   let note_gains = []
 
   let integer_series = new Array(60).fill().map((_, i) => i);
@@ -35,9 +37,11 @@
       mic.open().then(() => {
         mic.connect(fft)
         setInterval(() => {
+          fft_gains_prev = fft_gains
           fft_gains = fft.getValue();
+          fft_diffs = fft_gains.map((g, i) => g - fft_gains_prev[i])
           note_gains = note_indices.map((i) => fft_gains[i]);
-        }, 10)
+        }, 30)
       })
     }
   }
@@ -57,6 +61,13 @@
 <div class="graph">
 {#each fft_gains.slice(0,400) as gain, i}
   <div class="bar fft black {note_indices.includes(i) ? 'note' : ''}" style="height: {150+gain}px;">
+  </div>
+{/each}
+</div>
+
+<div class="graph">
+{#each fft_diffs.slice(0,400) as diff, i}
+  <div class="bar fft black {note_indices.includes(i) ? 'note' : ''}" style="height: {10+diff*10}px;">
   </div>
 {/each}
 </div>
