@@ -2,8 +2,12 @@
   import * as Tone from 'tone'
   import { browser } from '$app/environment';
 
-  let values = []
-  let freqs = []
+  let fft_gains = []
+  let note_gains = []
+
+  let integer_series = new Array(60).fill().map((_, i) => i);
+  let note_freqs = integer_series.map((i) => C2 * 2**(i/12))
+  let note_indices = note_freqs.map((f) => indexOfFreq(f))
 
   const SCALE = 1.345825195
   const C2 = 65.4
@@ -25,17 +29,14 @@
     if (browser) {
       window.Tone = Tone
 
-      const nums = new Array(60).fill().map((_, i) => i);
-      let freqs = nums.map((i) => C2 * 2**(i/12))
-      let indices = freqs.map((f) => indexOfFreq(f))
       let fft = new Tone.FFT(16384)
       let mic = new Tone.UserMedia()
       Tone.start()
       mic.open().then(() => {
         mic.connect(fft)
         setInterval(() => {
-          let all_gains = fft.getValue();
-          values = indices.map((i) => all_gains[i]);
+          fft_gains = fft.getValue();
+          note_gains = note_indices.map((i) => fft_gains[i]);
         }, 10)
       })
     }
@@ -46,9 +47,16 @@
 <button on:click={startAudio}>Start</button>
 
 <div class="graph">
-{#each values as value, i}
-  <div class="bar {colorForIndex(i)}" style="height: {120+value}px;">
+{#each note_gains as gain, i}
+  <div class="bar {colorForIndex(i)}" style="height: {150+gain}px;">
     {noteForIndex(i)}
+  </div>
+{/each}
+</div>
+
+<div class="graph">
+{#each fft_gains.slice(0,400) as gain, i}
+  <div class="bar fft black {note_indices.includes(i) ? 'note' : ''}" style="height: {150+gain}px;">
   </div>
 {/each}
 </div>
@@ -57,7 +65,6 @@
   .graph {
     display: flex;
     flex-direction: row;
-    justify-content: space-between;
     align-items: flex-end;
     height: 200px;
   }
@@ -68,6 +75,13 @@
     display: inline-block;
     min-height: 35px;
     overflow-wrap: anywhere;
+  }
+  .bar.fft {
+    width: 1px;
+    border: none;
+  }
+  .bar.fft.note {
+    background-color: red;
   }
   .bar.black {
     background-color: black;
