@@ -61,13 +61,19 @@
       mic.close();
       reset();
       clearInterval(interval);
+      interval = null;
     }
   }
 
 </script>
 
-<button on:click={startAudio}>Start</button>
-<button on:click={stopAudio}>Stop</button>
+<div class="controls">
+  {#if interval}
+    <button on:click={stopAudio}>Stop</button>
+  {:else}
+    <button on:click={startAudio}>Start</button>
+  {/if}
+</div>
 
 <div class="graph">
 {#each note_gains as gain, i}
@@ -92,6 +98,9 @@
 </div>
 
 <style>
+  button {
+    width: 100px;
+  }
   .graph {
     display: flex;
     flex-direction: row;
