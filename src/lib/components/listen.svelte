@@ -36,6 +36,7 @@
         interval = setInterval(() => {
           fft_gains_prev = fft_gains
           fft_gains = fft.getValue();
+          fft_peaks = findPeaks(fft_gains.slice(0,400));
           fft_diffs = fft_gains.map((g, i) => g - fft_gains_prev[i])
           note_gains = noteGains(fft_gains);
         }, 30)
@@ -62,8 +63,8 @@
   {/if}
 </div>
 
-<PianoGraph noteGains={note_gains} />
-<FFTGraph fft_gains={fft_gains} />
+<PianoGraph note_gains={note_gains} />
+<FFTGraph highlight_locations={fft_peaks} fft_gains={fft_gains} />
 <FFTDiffGraph fft_diffs={fft_diffs} />
 
 <style>

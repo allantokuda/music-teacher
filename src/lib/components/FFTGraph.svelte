@@ -1,11 +1,18 @@
 <script>
   import { noteIndices } from '$lib/fft_processing.js'
+  export let highlight_locations = [];
   export let fft_gains = [];
+
+  function barColor(i, highlight_locations, noteIndices) {
+    return highlight_locations.includes(i) ? 'red' :
+           noteIndices.includes(i) ? 'gray' : '';
+  }
 </script>
 
 <div class="graph">
   {#each fft_gains.slice(0,400) as gain, i}
-    <div class="bar {noteIndices.includes(i) ? 'note' : ''}" style="height: {150+gain}px;">
+    <div class="bar {barColor(i, highlight_locations, noteIndices)}"
+         style="height: {150+gain}px;">
     </div>
   {/each}
 </div>
@@ -26,7 +33,10 @@
     overflow-wrap: anywhere;
     background-color: black;
   }
-  .bar.note {
+  .bar.red {
     background-color: red;
+  }
+  .bar.gray {
+    background-color: gray;
   }
 </style>
