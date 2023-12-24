@@ -2,6 +2,7 @@
   import * as Tone from 'tone'
   import { noteGains } from '$lib/fft_processing.js'
   import findPeaks from '$lib/findPeaks.js'
+  import findPeakTracks from '$lib/findPeakTracks.js'
   import PianoGraph from '$lib/components/PianoGraph.svelte'
   import FFTGraph from '$lib/components/FFTGraph.svelte'
   import FFTDiffGraph from '$lib/components/FFTDiffGraph.svelte'
@@ -11,14 +12,14 @@
   let fft_diffs;
   let note_gains;
   let fft_peaks;
-  let peak_tracks = [];
+  let peak_history = [];
 
   function resetData() {
     fft_gains = []
     fft_gains_prev = []
     fft_diffs = []
     fft_peaks = []
-    peak_tracks = []
+    peak_history = []
     note_gains = []
   }
   resetData();
@@ -36,9 +37,12 @@
         fft_gains_prev = fft_gains
         fft_gains = fft.getValue();
         fft_peaks = findPeaks(fft_gains.slice(0,400));
-        peak_tracks.push(fft_peaks);
-        if (peak_tracks.length > 5) peak_tracks.shift()
-        //console.log(peak_tracks);
+        peak_history.push(fft_peaks);
+        if (peak_history.length > 5) {
+          peak_history.shift()
+          findPeakTracks(peak_history);
+        }
+        //console.log(peak_history);
         fft_diffs = fft_gains.map((g, i) => g - fft_gains_prev[i])
         note_gains = noteGains(fft_gains);
       }, 30)
