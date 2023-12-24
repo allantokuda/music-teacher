@@ -1,7 +1,8 @@
 <script>
   import * as Tone from 'tone'
   import { browser } from '$app/environment';
-  import { noteFreqs, noteIndices, noteGains, indexOfFreq, findPeaks } from '$lib/fft_processing.js'
+  import { noteFreqs, noteIndices, noteGains, indexOfFreq } from '$lib/fft_processing.js'
+  import findPeaks from '$lib/findPeaks.js'
   import PianoGraph from '$lib/components/PianoGraph.svelte'
   import FFTGraph from '$lib/components/FFTGraph.svelte'
   import FFTDiffGraph from '$lib/components/FFTDiffGraph.svelte'
