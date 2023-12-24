@@ -1,3 +1,5 @@
+const THRESHOLD = 5;
+
 // Find peaks in FFT data
 export default function findPeaks(fftGains) {
   // First find values larger value than their immediate neighbors.
@@ -10,13 +12,18 @@ export default function findPeaks(fftGains) {
     }
   }
 
-  // This filters to only the peaks that are the highest in their local neighborhood.
-  // This returns about 20 to 40 peaks.
+  // Filter to only the peaks that are the highest in their local neighborhood. This returns about 20 to 40 peaks.
+  // Filter further to only the peaks that are higher than their neighbors by a certain threshold. This returns about 3 to 15 peaks.
   let goodPeaks = [];
   for (let p = 0; p<peaks.length; p++) {
     let i = peaks[p];
     const n = Math.floor(i/35.66)
-    if (fftGains[i] === Math.max(...fftGains.slice(i-n, i+n))) {
+    const localArea = fftGains.slice(i-n, i+n);
+    const localMax = Math.max(...localArea);
+    const localMin = Math.min(...localArea);
+    if (fftGains[i] === localMax &&
+      fftGains[i] > fftGains[i-n] + THRESHOLD &&
+      fftGains[i] > fftGains[i+n] + THRESHOLD) {
       goodPeaks.push(i);
     }
   }
