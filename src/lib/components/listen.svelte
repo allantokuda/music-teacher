@@ -46,6 +46,7 @@
     clearInterval(interval);
     interval = null;
   }
+  $: fft_peak_locations = fft_peaks.map((obj) => obj.i);
 
 </script>
 
@@ -58,7 +59,7 @@
 </div>
 
 <PianoGraph note_gains={note_gains} />
-<FFTGraph highlight_locations={fft_peaks} fft_gains={fft_gains} />
+<FFTGraph highlight_locations={fft_peak_locations} fft_gains={fft_gains} />
 <FFTDiffGraph fft_diffs={fft_diffs} />
 
 <style>
