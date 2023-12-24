@@ -2,10 +2,18 @@
   import * as Tone from 'tone'
   import { browser } from '$app/environment';
 
-  let fft_gains = []
-  let fft_gains_prev = []
-  let fft_diffs = []
-  let note_gains = []
+  let fft_gains;
+  let fft_gains_prev;
+  let fft_diffs;
+  let note_gains;
+
+  function reset() {
+    fft_gains = []
+    fft_gains_prev = []
+    fft_diffs = []
+    note_gains = []
+  }
+  reset();
 
   let integer_series = new Array(60).fill().map((_, i) => i);
   let note_freqs = integer_series.map((i) => C2 * 2**(i/12))
@@ -26,17 +34,19 @@
     return noteForIndex(index).includes('#') ? 'black' : 'white';
   }
 
+  let mic;
+  let interval;
 
   function startAudio() {
     if (browser) {
       window.Tone = Tone
 
       let fft = new Tone.FFT(16384)
-      let mic = new Tone.UserMedia()
+      mic = new Tone.UserMedia()
       Tone.start()
       mic.open().then(() => {
         mic.connect(fft)
-        setInterval(() => {
+        interval = setInterval(() => {
           fft_gains_prev = fft_gains
           fft_gains = fft.getValue();
           fft_diffs = fft_gains.map((g, i) => g - fft_gains_prev[i])
@@ -46,9 +56,18 @@
     }
   }
 
+  function stopAudio() {
+    if (browser) {
+      mic.close();
+      reset();
+      clearInterval(interval);
+    }
+  }
+
 </script>
 
 <button on:click={startAudio}>Start</button>
+<button on:click={stopAudio}>Stop</button>
 
 <div class="graph">
 {#each note_gains as gain, i}
