@@ -1,7 +1,6 @@
 <script>
   import * as Tone from 'tone'
-  import { browser } from '$app/environment';
-  import { noteFreqs, noteIndices, noteGains, indexOfFreq } from '$lib/fft_processing.js'
+  import { noteGains } from '$lib/fft_processing.js'
   import findPeaks from '$lib/findPeaks.js'
   import PianoGraph from '$lib/components/PianoGraph.svelte'
   import FFTGraph from '$lib/components/FFTGraph.svelte'
@@ -26,32 +25,26 @@
   let interval;
 
   function startAudio() {
-    if (browser) {
-      window.Tone = Tone
-
-      let fft = new Tone.FFT(16384)
-      mic = new Tone.UserMedia()
-      Tone.start()
-      mic.open().then(() => {
-        mic.connect(fft)
-        interval = setInterval(() => {
-          fft_gains_prev = fft_gains
-          fft_gains = fft.getValue();
-          fft_peaks = findPeaks(fft_gains.slice(0,400));
-          fft_diffs = fft_gains.map((g, i) => g - fft_gains_prev[i])
-          note_gains = noteGains(fft_gains);
-        }, 30)
-      })
-    }
+    let fft = new Tone.FFT(16384)
+    mic = new Tone.UserMedia()
+    Tone.start()
+    mic.open().then(() => {
+      mic.connect(fft)
+      interval = setInterval(() => {
+        fft_gains_prev = fft_gains
+        fft_gains = fft.getValue();
+        fft_peaks = findPeaks(fft_gains.slice(0,400));
+        fft_diffs = fft_gains.map((g, i) => g - fft_gains_prev[i])
+        note_gains = noteGains(fft_gains);
+      }, 30)
+    })
   }
 
   function stopAudio() {
-    if (browser) {
-      mic.close();
-      resetData();
-      clearInterval(interval);
-      interval = null;
-    }
+    mic.close();
+    resetData();
+    clearInterval(interval);
+    interval = null;
   }
 
 </script>
