@@ -67,7 +67,7 @@
 
 <div class="graph">
 {#each fft_diffs.slice(0,400) as diff, i}
-  <div class="bar fft black {note_indices.includes(i) ? 'note' : ''}" style="height: {10+diff*10}px;">
+  <div class="bar fft black {note_indices.includes(i) ? 'note' : ''} {diff > 0 ? 'up' : 'down'}" style="height: {Math.abs(diff)*10}px;">
   </div>
 {/each}
 </div>
@@ -90,9 +90,13 @@
   .bar.fft {
     width: 1px;
     border: none;
+    min-height: 0px;
   }
   .bar.fft.note {
     background-color: red;
+  }
+  .bar.fft.down {
+    background-color: blue;
   }
   .bar.black {
     background-color: black;
