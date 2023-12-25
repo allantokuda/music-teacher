@@ -16,7 +16,7 @@
     display: flex;
     flex-direction: row;
     align-items: flex-end;
-    height: 200px;
+    height: 100px;
   }
   .bar {
     width: 1px;

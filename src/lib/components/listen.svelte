@@ -1,6 +1,7 @@
 <script>
   import * as Tone from 'tone'
   import { noteGains, noteNumForIndex } from '$lib/fft_processing.js'
+  import stackOvertones from '$lib/stackOvertones.js'
   import findPeaks from '$lib/findPeaks.js'
   import findPeakTracks from '$lib/findPeakTracks.js'
   import findAttacks from '$lib/findAttacks.js'
@@ -15,9 +16,10 @@
   let note_gains;
   let fft_peaks;
   let peak_history;
-  let attacks;
   let attack_note_numbers;
-  let note_numbers;
+  let strong_note_numbers;
+  let highlight_note_indices;
+  let highlight_note_numbers;
 
   function resetData() {
     fft_gains = []
@@ -26,9 +28,10 @@
     note_gains = []
     fft_peaks = []
     peak_history = []
-    attacks = [];
     attack_note_numbers = [];
-    note_numbers = [];
+    strong_note_numbers = [];
+    highlight_note_indices = [];
+    highlight_note_numbers = [];
   }
   resetData();
 
@@ -44,7 +47,8 @@
       interval = setInterval(() => {
         fft_gains_prev = fft_gains
         fft_gains = fft.getValue();
-        fft_peaks = findPeaks(fft_gains.slice(0,2000));
+        fft_gains = stackOvertones(fft_gains);
+        fft_peaks = findPeaks(fft_gains.slice(0,2000), 20);
         fft_diffs = fft_gains.map((g, i) => g - fft_gains_prev[i])
         note_gains = noteGains(fft_gains);
 
@@ -52,11 +56,11 @@
         if (peak_history.length > 5) {
           peak_history.shift()
           let peak_tracks = findPeakTracks(peak_history);
+
           let attack_tracks = findAttacks(peak_tracks);
-          attacks = attack_tracks.map((track) => track.index);
-          let notes = findOvertoneSeries(attacks);
-          let note_indices = notes.map((note) => note.index);
-          note_numbers = note_indices.map(noteNumForIndex);
+          let attack_indices = attack_tracks.map((track) => track.index);
+          highlight_note_indices = attack_indices;
+          highlight_note_numbers = attack_indices.map(noteNumForIndex);
         }
       }, 30)
     })
@@ -79,8 +83,8 @@
   {/if}
 </div>
 
-<PianoGraph note_gains={note_gains} highlight_note_numbers={note_numbers} />
-<FFTGraph highlight_locations={attacks} fft_gains={fft_gains} />
+<PianoGraph note_gains={note_gains} highlight_note_numbers={highlight_note_numbers} />
+<FFTGraph highlight_locations={highlight_note_indices} fft_gains={fft_gains} />
 <FFTDiffGraph fft_diffs={fft_diffs} />
 
 <style>

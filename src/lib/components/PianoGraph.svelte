@@ -13,7 +13,7 @@
 
 <div class="piano-graph">
   {#each note_gains as gain, n}
-    <div class="bar {noteColor(n)} {noteHighlight(n, highlight_note_numbers)}" style="height: {150+gain}px;">
+    <div class="bar {noteColor(n)} {noteHighlight(n, highlight_note_numbers)}" style="height: {300+gain}px;">
       {noteName(n)}
     </div>
   {/each}
