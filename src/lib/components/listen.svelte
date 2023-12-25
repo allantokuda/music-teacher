@@ -3,6 +3,7 @@
   import { noteGains } from '$lib/fft_processing.js'
   import findPeaks from '$lib/findPeaks.js'
   import findPeakTracks from '$lib/findPeakTracks.js'
+  import findAttacks from '$lib/findAttacks.js'
   import PianoGraph from '$lib/components/PianoGraph.svelte'
   import FFTGraph from '$lib/components/FFTGraph.svelte'
   import FFTDiffGraph from '$lib/components/FFTDiffGraph.svelte'
@@ -12,15 +13,17 @@
   let fft_diffs;
   let note_gains;
   let fft_peaks;
-  let peak_history = [];
+  let peak_history;
+  let attacks;
 
   function resetData() {
     fft_gains = []
     fft_gains_prev = []
     fft_diffs = []
+    note_gains = []
     fft_peaks = []
     peak_history = []
-    note_gains = []
+    attacks = [];
   }
   resetData();
 
@@ -37,14 +40,15 @@
         fft_gains_prev = fft_gains
         fft_gains = fft.getValue();
         fft_peaks = findPeaks(fft_gains.slice(0,400));
+        fft_diffs = fft_gains.map((g, i) => g - fft_gains_prev[i])
+        note_gains = noteGains(fft_gains);
+
         peak_history.push(fft_peaks);
         if (peak_history.length > 5) {
           peak_history.shift()
-          findPeakTracks(peak_history);
+          let peak_tracks = findPeakTracks(peak_history);
+          attacks = findAttacks(peak_tracks).map((attack) => attack.index);
         }
-        //console.log(peak_history);
-        fft_diffs = fft_gains.map((g, i) => g - fft_gains_prev[i])
-        note_gains = noteGains(fft_gains);
       }, 30)
     })
   }
@@ -55,7 +59,6 @@
     clearInterval(interval);
     interval = null;
   }
-  $: fft_peak_locations = fft_peaks.map((obj) => obj.i);
 
 </script>
 
@@ -68,7 +71,7 @@
 </div>
 
 <PianoGraph note_gains={note_gains} />
-<FFTGraph highlight_locations={fft_peak_locations} fft_gains={fft_gains} />
+<FFTGraph highlight_locations={attacks} fft_gains={fft_gains} />
 <FFTDiffGraph fft_diffs={fft_diffs} />
 
 <style>

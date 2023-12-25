@@ -41,9 +41,11 @@ export default function findPeakTracks(peak_history) {
 
   let peak_tracks = stepwise_peak_tracks.map((track) => {
     const gains = [track.steps[0].from.gain].concat(track.steps.map((step) => step.to.gain));
+    const gain_steps = track.steps.map((step) => step.to.gain - step.from.gain);
     return {
       index: track.steps[0].from.i, // later could consider taking the median if there is a lot of drift
-      gains: gains
+      gains: gains,
+      gain_steps: gain_steps,
     }
   })
   //console.log(peak_tracks);
