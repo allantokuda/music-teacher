@@ -1,9 +1,9 @@
-const RISE_THRESHOLD = 0.5;
+const RISE_THRESHOLD = 3;
 // Find "attacks" (sudden up-trends) in FFT data
 export default function findAttacks(peak_tracks) {
   return peak_tracks.filter((track) => {
-    return track.gain_steps.reduce((acc, gain_step) => {
-      return gain_step > RISE_THRESHOLD;
-    }, true)
+    const first_gain = track.gains[0];
+    const last_gain = track.gains[track.gains.length-1];
+    return last_gain > first_gain + RISE_THRESHOLD;
   })
 }
