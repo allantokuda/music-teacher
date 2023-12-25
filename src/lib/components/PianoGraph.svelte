@@ -1,19 +1,19 @@
 <script>
   export let note_gains = [];
-  export let attack_note_numbers = [];
+  export let highlight_note_numbers = [];
   import { noteName } from '$lib/fft_processing.js';
 
   function noteColor(noteNum) {
     return noteName(noteNum).includes('#') ? 'black' : 'white';
   }
-  function noteHighlight(noteNum, attack_note_numbers) {
-    return attack_note_numbers.includes(noteNum) ? 'highlight' : '';
+  function noteHighlight(noteNum, highlight_note_numbers) {
+    return highlight_note_numbers.includes(noteNum) ? 'highlight' : '';
   }
 </script>
 
 <div class="piano-graph">
   {#each note_gains as gain, n}
-    <div class="bar {noteColor(n)} {noteHighlight(n, attack_note_numbers)}" style="height: {150+gain}px;">
+    <div class="bar {noteColor(n)} {noteHighlight(n, highlight_note_numbers)}" style="height: {150+gain}px;">
       {noteName(n)}
     </div>
   {/each}

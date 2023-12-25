@@ -4,6 +4,7 @@
   import findPeaks from '$lib/findPeaks.js'
   import findPeakTracks from '$lib/findPeakTracks.js'
   import findAttacks from '$lib/findAttacks.js'
+  import findOvertoneSeries from '$lib/findOvertoneSeries.js'
   import PianoGraph from '$lib/components/PianoGraph.svelte'
   import FFTGraph from '$lib/components/FFTGraph.svelte'
   import FFTDiffGraph from '$lib/components/FFTDiffGraph.svelte'
@@ -16,6 +17,7 @@
   let peak_history;
   let attacks;
   let attack_note_numbers;
+  let note_numbers;
 
   function resetData() {
     fft_gains = []
@@ -26,6 +28,7 @@
     peak_history = []
     attacks = [];
     attack_note_numbers = [];
+    note_numbers = [];
   }
   resetData();
 
@@ -41,7 +44,7 @@
       interval = setInterval(() => {
         fft_gains_prev = fft_gains
         fft_gains = fft.getValue();
-        fft_peaks = findPeaks(fft_gains.slice(0,400));
+        fft_peaks = findPeaks(fft_gains.slice(0,2000));
         fft_diffs = fft_gains.map((g, i) => g - fft_gains_prev[i])
         note_gains = noteGains(fft_gains);
 
@@ -49,9 +52,11 @@
         if (peak_history.length > 5) {
           peak_history.shift()
           let peak_tracks = findPeakTracks(peak_history);
-          let attack_tracks = findAttacks(peak_tracks)
+          let attack_tracks = findAttacks(peak_tracks);
           attacks = attack_tracks.map((track) => track.index);
-          attack_note_numbers = attacks.map(noteNumForIndex);
+          let notes = findOvertoneSeries(attacks);
+          let note_indices = notes.map((note) => note.index);
+          note_numbers = note_indices.map(noteNumForIndex);
         }
       }, 30)
     })
@@ -74,7 +79,7 @@
   {/if}
 </div>
 
-<PianoGraph note_gains={note_gains} attack_note_numbers={attack_note_numbers} />
+<PianoGraph note_gains={note_gains} highlight_note_numbers={note_numbers} />
 <FFTGraph highlight_locations={attacks} fft_gains={fft_gains} />
 <FFTDiffGraph fft_diffs={fft_diffs} />
 
