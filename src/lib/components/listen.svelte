@@ -1,6 +1,6 @@
 <script>
   import * as Tone from 'tone'
-  import { noteGains } from '$lib/fft_processing.js'
+  import { noteGains, noteNumForIndex } from '$lib/fft_processing.js'
   import findPeaks from '$lib/findPeaks.js'
   import findPeakTracks from '$lib/findPeakTracks.js'
   import findAttacks from '$lib/findAttacks.js'
@@ -15,6 +15,7 @@
   let fft_peaks;
   let peak_history;
   let attacks;
+  let attack_note_numbers;
 
   function resetData() {
     fft_gains = []
@@ -24,6 +25,7 @@
     fft_peaks = []
     peak_history = []
     attacks = [];
+    attack_note_numbers = [];
   }
   resetData();
 
@@ -47,7 +49,9 @@
         if (peak_history.length > 5) {
           peak_history.shift()
           let peak_tracks = findPeakTracks(peak_history);
-          attacks = findAttacks(peak_tracks).map((attack) => attack.index);
+          let attack_tracks = findAttacks(peak_tracks)
+          attacks = attack_tracks.map((track) => track.index);
+          attack_note_numbers = attacks.map(noteNumForIndex);
         }
       }, 30)
     })
@@ -70,7 +74,7 @@
   {/if}
 </div>
 
-<PianoGraph note_gains={note_gains} />
+<PianoGraph note_gains={note_gains} attack_note_numbers={attack_note_numbers} />
 <FFTGraph highlight_locations={attacks} fft_gains={fft_gains} />
 <FFTDiffGraph fft_diffs={fft_diffs} />
 
