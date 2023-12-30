@@ -6,6 +6,15 @@
 	<main>
 		<slot />
 	</main>
+	<footer>
+		<nav>
+			<a href="/">Home</a>
+			|
+			<a href="/play">Play Game</a>
+			|
+			<a href="/detection">Note Detection</a>
+		</nav>
+	</footer>
 </div>
 
 <style>
@@ -32,10 +41,13 @@
 		justify-content: center;
 		align-items: center;
 		padding: 12px;
+		background-color: #000000;
+		opacity: 0.5;
+		color: white;
 	}
 
 	footer a {
-		font-weight: bold;
+		color: white;
 	}
 
 	@media (min-width: 480px) {

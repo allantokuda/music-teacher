@@ -1,7 +1,14 @@
 <script>
 </script>
 
-<a href="/detection">Note detection testing</a>
+<div>
+<a href="/play">Play game!</a>
+</div>
 
 <style>
+  main {
+    display: flex;
+    flex-direction: column;
+    min-height: 100vh;
+  }
 </style>
