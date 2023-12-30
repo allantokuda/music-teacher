@@ -1,14 +1,16 @@
 <script>
   import * as Tone from 'tone'
-  import { noteGains, noteNumForIndex } from '$lib/noteMap.js'
-  import stackOvertones from '$lib/stackOvertones.js'
-  import findPeaks from '$lib/findPeaks.js'
-  import findPeakTracks from '$lib/findPeakTracks.js'
-  import findAttacks from '$lib/findAttacks.js'
-  import findOvertoneSeries from '$lib/findOvertoneSeries.js'
-  import PianoGraph from '$lib/components/PianoGraph.svelte'
-  import FFTGraph from '$lib/components/FFTGraph.svelte'
-  import FFTDiffGraph from '$lib/components/FFTDiffGraph.svelte'
+
+  import { noteGains, noteNumForIndex } from './functions/noteMap.js'
+  import stackOvertones from './functions/stackOvertones.js'
+  import findPeaks from './functions/findPeaks.js'
+  import findPeakTracks from './functions/findPeakTracks.js'
+  import findAttacks from './functions/findAttacks.js'
+  import findOvertoneSeries from './functions/findOvertoneSeries.js'
+
+  import PianoGraph from './components/PianoGraph.svelte'
+  import FFTGraph from './components/FFTGraph.svelte'
+  import FFTDiffGraph from './components/FFTDiffGraph.svelte'
 
   let fft_gains;
   let fft_gains_prev;

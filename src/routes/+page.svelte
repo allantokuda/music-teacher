@@ -1,7 +1,7 @@
 <script>
-  import Listen from '$lib/components/Listen.svelte'
+  import Detector from '$lib/detector/Detector.svelte'
 </script>
 
-<Listen />
+<Detector />
 <style>
 </style>
