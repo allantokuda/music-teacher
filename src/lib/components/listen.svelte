@@ -1,6 +1,6 @@
 <script>
   import * as Tone from 'tone'
-  import { noteGains, noteNumForIndex } from '$lib/fft_processing.js'
+  import { noteGains, noteNumForIndex } from '$lib/noteMap.js'
   import stackOvertones from '$lib/stackOvertones.js'
   import findPeaks from '$lib/findPeaks.js'
   import findPeakTracks from '$lib/findPeakTracks.js'

@@ -1,5 +1,5 @@
 <script>
-  import { noteIndices } from '$lib/fft_processing.js'
+  import { noteIndices } from '$lib/noteMap.js'
   export let fft_diffs = [];
 </script>
 
