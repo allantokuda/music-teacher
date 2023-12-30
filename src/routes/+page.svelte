@@ -1,7 +1,7 @@
 <script>
-  import Detector from '$lib/detector/Detector.svelte'
 </script>
 
-<Detector />
+<a href="/detection">Note detection testing</a>
+
 <style>
 </style>
