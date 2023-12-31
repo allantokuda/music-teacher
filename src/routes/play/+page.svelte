@@ -3,7 +3,7 @@
   import Vex from 'vexflow';
 
   if (browser) {
-    $: {
+    setTimeout(() => {
       const { Factory, EasyScore, System } = Vex.Flow;
       const vf = new Factory({
         renderer: { elementId: 'output', width: 500, height: 200 },
@@ -23,7 +23,7 @@
         .addTimeSignature('4/4');
 
       vf.draw();
-    }
+    });
   }
 </script>
 
