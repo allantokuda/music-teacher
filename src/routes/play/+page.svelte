@@ -1,8 +1,15 @@
 <script>
   import { browser } from '$app/environment';
   import Vex from 'vexflow';
+  import Detector from '$lib/detector/Detector.ts';
+  import { onDestroy } from 'svelte';
 
+  let d;
   if (browser) {
+    d = new Detector();
+    d.start();
+    d.stop();
+
     setTimeout(() => {
       const { Factory, EasyScore, System } = Vex.Flow;
       const vf = new Factory({
@@ -25,6 +32,10 @@
       vf.draw();
     });
   }
+
+  onDestroy(() => {
+    d.stop();
+  });
 </script>
 
 <div id="output"></div>

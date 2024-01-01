@@ -1,8 +1,25 @@
 <script>
+  import { goto } from '$app/navigation';
+  /* import Detector from '$lib/detector/Detector.ts'; */
+
+  import * as Tone from 'tone';
+
+  function play() {
+    /* let d = new Detector(); */
+    /* d.start(); */
+    /* d.stop(); */
+
+    let mic = new Tone.UserMedia();
+    //Tone.start()
+    mic.open().then(() => {
+      mic.close();
+      goto('/play');
+    });
+  }
 </script>
 
 <div>
-<a href="/play">Play game!</a>
+  <button on:click={play}>Play game!</button>
 </div>
 
 <style>
