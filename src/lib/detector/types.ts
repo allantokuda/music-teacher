@@ -10,3 +10,7 @@ export interface PeakTrack {
   gain_steps: number[];
 }
 
+export interface Note {
+  note_num: number;
+  note_name: string;
+}

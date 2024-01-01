@@ -1,11 +1,11 @@
 import * as Tone from 'tone'
 
-import { noteGains, noteNumForIndex } from './functions/noteMap.js'
+import { noteGains, noteNumForIndex, noteName } from './functions/noteMap.js'
 import step1_stackOvertones from './functions/step1_stackOvertones.js'
 import step2_findPeaks      from './functions/step2_findPeaks'
 import step3_findPeakTracks from './functions/step3_findPeakTracks.js'
 import step4_findAttacks    from './functions/step4_findAttacks.js'
-import type { Peak } from './types'
+import type { Note, Peak } from './types'
 
 export interface DetectorData {
   fft_gains: number[]
@@ -19,7 +19,7 @@ export interface DetectorData {
 
 export default class Detector {
   fftCallback: (fft_gains: DetectorData) => void = () => {};
-  noteCallback: (note: number) => void = () => {};
+  noteCallback: (note: Note) => void = () => {};
 
   private interval: number = 0;
   private mic: Tone.UserMedia | null = null;
@@ -30,7 +30,7 @@ export default class Detector {
     this.fftCallback = callback;
   }
 
-  onNote(callback: (note: number) => void) {
+  onNote(callback: (note: Note) => void) {
     this.noteCallback = callback;
   }
 
@@ -66,6 +66,12 @@ export default class Detector {
           attack_tracks = step4_findAttacks(peak_tracks);
           attack_note_indices = attack_tracks.map((track) => track.index);
           attack_note_numbers = attack_note_indices.map(noteNumForIndex);
+        }
+
+        if (attack_note_numbers.length > 0) {
+          const note_num = attack_note_numbers[0];
+          const note_name = noteName(note_num);
+          this.noteCallback({ note_num, note_name });
         }
 
         if (this.fftCallback) {
