@@ -1,7 +1,9 @@
+import type { Peak } from '../types';
+
 const THRESHOLD = 5;
 
 // Find peaks in FFT data
-export default function findPeaks(fftGains, threshold=THRESHOLD) {
+export default function findPeaks(fftGains: number[], threshold=THRESHOLD): Peak[] {
   // First find values larger value than their immediate neighbors.
   // This is not robust to noise.
   // It returns 50 to 100 peaks within this 5 octave range.

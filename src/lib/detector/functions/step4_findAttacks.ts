@@ -1,6 +1,8 @@
+import type { PeakTrack } from '../types';
+
 const RISE_THRESHOLD = 3;
 // Find "attacks" (sudden up-trends) in FFT data
-export default function findAttacks(peak_tracks) {
+export default function step4_findAttacks(peak_tracks: PeakTrack[]) {
   return peak_tracks.filter((track) => {
     const first_gain = track.gains[0];
     const last_gain = track.gains[track.gains.length-1];
