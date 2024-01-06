@@ -64,7 +64,7 @@
 </script>
 
 <div id="output">
-  <span>{currentNote.note_name}</span>
+  <span class="hidden">{currentNote.note_name}</span>
 </div>
 
 <style>
