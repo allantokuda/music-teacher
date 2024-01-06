@@ -3,7 +3,7 @@
   import Vex from 'vexflow';
   import Detector from '$lib/detector/Detector.ts';
   import { onDestroy } from 'svelte';
-  import { randomNote } from '$lib/detector/functions/noteMap.ts';
+  import { randomNote } from '$lib/noteMap';
   const { Factory, EasyScore, System } = Vex.Flow;
 
   let detector;

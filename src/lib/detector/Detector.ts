@@ -1,11 +1,11 @@
 import * as Tone from 'tone'
 
-import { noteGains, noteNumForIndex, noteName } from './functions/noteMap.js'
+import { noteGains, noteNumForIndex, noteName } from '$lib/noteMap'
 import step1_stackOvertones from './functions/step1_stackOvertones.js'
 import step2_findPeaks      from './functions/step2_findPeaks'
 import step3_findPeakTracks from './functions/step3_findPeakTracks.js'
 import step4_findAttacks    from './functions/step4_findAttacks.js'
-import type { Note, Peak } from './types'
+import type { Note, Peak } from '$lib/types'
 
 export interface DetectorData {
   fft_gains: number[]

@@ -11,7 +11,7 @@
 //   [{ i: 100, gain: 0.4 }, { i: 200, gain: 9.9 }]
 // ]
 
-import type { Peak, PeakTrack } from '../types';
+import type { Peak, PeakTrack } from '$lib/types';
 
 interface RawPeakTrack {
   steps: {

@@ -1,5 +1,5 @@
 <script>
-  import { noteIndices } from '../functions/noteMap.ts'
+  import { noteIndices } from '$lib/noteMap'
   export let highlight_locations = [];
   export let fft_gains = [];
 

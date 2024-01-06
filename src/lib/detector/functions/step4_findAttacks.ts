@@ -1,4 +1,4 @@
-import type { PeakTrack } from '../types';
+import type { PeakTrack } from '$lib/types';
 
 const RISE_THRESHOLD = 3;
 // Find "attacks" (sudden up-trends) in FFT data

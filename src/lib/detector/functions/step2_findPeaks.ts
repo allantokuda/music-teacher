@@ -1,4 +1,4 @@
-import type { Peak } from '../types';
+import type { Peak } from '$lib/types';
 
 const THRESHOLD = 5;
 

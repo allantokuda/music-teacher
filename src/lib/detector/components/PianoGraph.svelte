@@ -1,7 +1,7 @@
 <script>
   export let note_gains = [];
   export let highlight_note_numbers = [];
-  import { noteName } from '../functions/noteMap.ts';
+  import { noteName } from '$lib/noteMap';
 
   function noteColor(noteNum) {
     return noteName(noteNum).includes('#') ? 'black' : 'white';
