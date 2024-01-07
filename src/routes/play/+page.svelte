@@ -14,7 +14,7 @@
   let heardNote = null;
 
   if (browser) {
-    displayNote();
+    displayNotes();
 
     detector = new Detector();
     detector.start();
@@ -23,14 +23,14 @@
         updateNote();
         console.log(`HIT ${note.pitch_name}`);
       } else {
-        //displayNote();
+        //displayNotes();
         console.log(`Heard ${note.pitch_name}, looking for ${currentNote.pitch_name}`);
       }
     });
 
   }
 
-  function displayNote() {
+  function displayNotes() {
     document.querySelectorAll('#output svg').forEach((elem) => elem.remove());
     setTimeout(() => {
       const vf = new Factory({
@@ -58,7 +58,20 @@
 
   function updateNote() {
     currentNoteIndex = (currentNoteIndex + 1) % 4 // loop back to beginning for now
+    if (currentNoteIndex === 0) {
+      measure = composer.writeMeasure();
+      displayNotes();
+    }
     currentNote = measure.notes[currentNoteIndex];
+
+    const svgNotes = document.querySelectorAll('.vf-stavenote');
+    for (let i = 0; i < svgNotes.length; i++) {
+      if (i < currentNoteIndex) {
+        svgNotes[i].classList.add('played');
+      } else {
+        svgNotes[i].classList.remove('played');
+      }
+    }
   }
 
   onDestroy(() => {
