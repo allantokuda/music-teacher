@@ -9,7 +9,8 @@
   let detector;
   let composer = new Composer();
   let measure = composer.writeMeasure();
-  let currentNote = measure.notes[0];
+  let currentNoteIndex = 0;
+  let currentNote = measure.notes[currentNoteIndex];
   let heardNote = null;
 
   if (browser) {
@@ -56,8 +57,8 @@
   }
 
   function updateNote() {
-    currentNote = randomNote();
-    displayNote();
+    currentNoteIndex = (currentNoteIndex + 1) % 4 // loop back to beginning for now
+    currentNote = measure.notes[currentNoteIndex];
   }
 
   onDestroy(() => {

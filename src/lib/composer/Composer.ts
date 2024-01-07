@@ -2,6 +2,8 @@ import { pitches } from '$lib/pitch';
 import type { Measure, Pitch } from '$lib/types';
 import PRNG from 'prng';
 
+const cMajorScale = pitches.filter((p) => p.pitch_name.endsWith('4') && !p.pitch_name.includes('#'));
+
 export default class Composer {
   prng: PRNG;
   constructor(seed: number = Date.now()) {
@@ -25,7 +27,6 @@ export default class Composer {
 
   // Just start with a C major scale for now (C4 to B4)
   randomPitch(): Pitch {
-    const limitedScale = pitches.filter((p) => p.pitch_name.endsWith('4') && !p.pitch_name.includes('#'));
-    return limitedScale[this.prng.rand(6)];
+    return cMajorScale[this.prng.rand(6)];
   }
 }
