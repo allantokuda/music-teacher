@@ -37,8 +37,8 @@
   {/if}
 </div>
 
-<PianoGraph note_gains={data.note_gains} highlight_note_numbers={data.attack_note_numbers} />
-<FFTGraph highlight_locations={data.attack_note_indices} fft_gains={data.fft_gains} />
+<PianoGraph pitch_gains={data.pitch_gains} highlight_pitch_numbers={data.attack_pitch_numbers} />
+<FFTGraph highlight_locations={data.attack_fft_indices} fft_gains={data.fft_gains} />
 <FFTDiffGraph fft_diffs={data.fft_diffs} />
 
 <style>

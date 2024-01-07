@@ -1,11 +1,11 @@
 <script>
-  import { noteIndices } from '$lib/noteMap'
+  import { pitchIndices } from '$lib/pitch'
   export let fft_diffs = [];
 </script>
 
 <div class="graph">
 {#each fft_diffs.slice(0,400) as diff, i}
-  <div class="bar {noteIndices.includes(i) ? 'note' : ''} {diff > 0 ? 'up' : 'down'}" style="height: {Math.abs(diff)*10}px;">
+  <div class="bar {pitchIndices.includes(i) ? 'pitch' : ''} {diff > 0 ? 'up' : 'down'}" style="height: {Math.abs(diff)*10}px;">
   </div>
 {/each}
 </div>
@@ -27,7 +27,7 @@
     overflow-wrap: anywhere;
     background-color: black;
   }
-  .bar.note {
+  .bar.pitch {
     background-color: red;
   }
   .bar.down {

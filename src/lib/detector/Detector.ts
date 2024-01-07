@@ -1,27 +1,27 @@
 import * as Tone from 'tone'
 
-import { noteGains, noteNumForIndex, noteName } from '$lib/noteMap'
+import { pitches, pitchGains, pitchNumForIndex } from '$lib/pitch'
 import step1_stackOvertones from './functions/step1_stackOvertones.js'
 import step2_findPeaks      from './functions/step2_findPeaks'
 import step3_findPeakTracks from './functions/step3_findPeakTracks.js'
 import step4_findAttacks    from './functions/step4_findAttacks.js'
-import type { Note, Peak } from '$lib/types'
+import type { Pitch, Peak } from '$lib/types'
 
 export interface DetectorData {
   fft_gains: number[]
   fft_diffs: number[]
-  note_gains: number[]
+  pitch_gains: number[]
   fft_peaks: Peak[]
   peak_history: Peak[][]
-  attack_note_indices: number[]
-  attack_note_numbers: number[]
+  attack_fft_indices: number[]
+  attack_pitch_numbers: number[]
 }
 
 export default class Detector {
   fftCallback: (fft_gains: DetectorData) => void = () => {};
-  noteCallback: (note: Note) => void = () => {};
+  noteCallback: (pitch: Pitch) => void = () => {};
 
-  private interval: number = 0;
+  private interval: ReturnType<typeof setInterval> | undefined = undefined;
   private mic: Tone.UserMedia | null = null;
 
   constructor() {}
@@ -30,7 +30,7 @@ export default class Detector {
     this.fftCallback = callback;
   }
 
-  onNote(callback: (note: Note) => void) {
+  onNote(callback: (pitch: Pitch) => void) {
     this.noteCallback = callback;
   }
 
@@ -45,7 +45,7 @@ export default class Detector {
       this.interval = setInterval(() => {
         let fft_gains = step1_stackOvertones(fft.getValue());
         let fft_peaks = step2_findPeaks(fft_gains.slice(0,2000), 20);
-        let note_gains = noteGains(fft_gains);
+        let pitch_gains = pitchGains(fft_gains);
 
         let fft_diffs: number[];
         if (fft_gains_prev) {
@@ -58,31 +58,30 @@ export default class Detector {
 
         let peak_tracks = [];
         let attack_tracks = [];
-        let attack_note_indices: number[] = [];
-        let attack_note_numbers: number[] = [];
+        let attack_fft_indices: number[] = [];
+        let attack_pitch_numbers: number[] = []; // pitches may not be in range -> undefined
         if (peak_history.length > 5) {
           peak_history.shift()
           peak_tracks = step3_findPeakTracks(peak_history);
           attack_tracks = step4_findAttacks(peak_tracks);
-          attack_note_indices = attack_tracks.map((track) => track.index);
-          attack_note_numbers = attack_note_indices.map(noteNumForIndex);
+          attack_fft_indices = attack_tracks.map((track) => track.index);
+          attack_pitch_numbers = attack_fft_indices.map(pitchNumForIndex).filter((n) => n !== undefined) as number[]; // TS doesn't see that I'm filtering by undefined
         }
 
-        if (attack_note_numbers.length > 0) {
-          const note_num = attack_note_numbers[0];
-          const note_name = noteName(note_num);
-          this.noteCallback({ note_num, note_name });
+        if (attack_pitch_numbers.length > 0) {
+          const pitch_num = attack_pitch_numbers[0];
+          this.noteCallback(pitches[pitch_num]);
         }
 
         if (this.fftCallback) {
           this.fftCallback({
             fft_gains,
             fft_diffs,
-            note_gains,
+            pitch_gains,
             fft_peaks,
             peak_history,
-            attack_note_indices,
-            attack_note_numbers,
+            attack_fft_indices,
+            attack_pitch_numbers,
           });
         }
 

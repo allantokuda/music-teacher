@@ -3,11 +3,13 @@
   import Vex from 'vexflow';
   import Detector from '$lib/detector/Detector.ts';
   import { onDestroy } from 'svelte';
-  import { randomNote } from '$lib/noteMap';
+  import Composer from '$lib/composer/Composer';
   const { Factory, EasyScore, System } = Vex.Flow;
 
   let detector;
-  let currentNote = randomNote();
+  let composer = new Composer();
+  let measure = composer.writeMeasure();
+  let currentNote = measure.notes[0];
   let heardNote = null;
 
   if (browser) {
@@ -16,12 +18,12 @@
     detector = new Detector();
     detector.start();
     detector.onNote((note) => {
-      if (note.note_num === currentNote.note_num) {
+      if (note.pitch_num === currentNote.pitch_num) {
         updateNote();
-        console.log(`HIT ${note.note_name}`);
+        console.log(`HIT ${note.pitch_name}`);
       } else {
         //displayNote();
-        console.log(`Heard ${note.note_name}, looking for ${currentNote.note_name}`);
+        console.log(`Heard ${note.pitch_name}, looking for ${currentNote.pitch_name}`);
       }
     });
 
@@ -37,12 +39,12 @@
       const score = vf.EasyScore();
       const system = vf.System();
 
-      let note_code = `${currentNote.note_name}/w`;
+      let note_code = `${currentNote.pitch_name}/w`;
       let voices = [
-        score.voice(score.notes(note_code, { stem: 'up' })),
+        score.voice(score.notes(measure.easyScore, { stem: 'up' })),
       ];
       /* if (heardNote) { */
-      /*   heard_note_code = `${heardNote.note_name}/w`; */
+      /*   heard_note_code = `${heardNote.pitch_name}/w`; */
       /*   voices.push(score.voice(score.notes(heard_note_code, { stem: 'down' }))); */
       /* } */
       system
@@ -64,7 +66,7 @@
 </script>
 
 <div id="output">
-  <span class="hidden">{currentNote.note_name}</span>
+  <span class="hidden">{currentNote.pitch_name}</span>
 </div>
 
 <style>

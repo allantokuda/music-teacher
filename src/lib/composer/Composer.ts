@@ -1,3 +1,5 @@
+import { pitches } from '$lib/pitch';
+import type { Measure, Pitch } from '$lib/types';
 import PRNG from 'prng';
 
 export default class Composer {
@@ -6,18 +8,24 @@ export default class Composer {
     this.prng = new PRNG(seed);
   }
 
-  writeMeasure(): string {
-    return [
-      this.randomNote() + '/q',
-      this.randomNote(),
-      this.randomNote(),
-      this.randomNote(),
-    ].join(', ');
+  writeMeasure(): Measure {
+    // For now notes are just pitches, all quarter notes
+    const notes = [
+      this.randomPitch(),
+      this.randomPitch(),
+      this.randomPitch(),
+      this.randomPitch()
+    ]
+    const pitchNames = notes.map((n) => n.pitch_name);
+    return {
+      easyScore: `${pitchNames[0]}/q, ${pitchNames[1]}, ${pitchNames[2]}, ${pitchNames[3]}`,
+      notes: notes,
+    }
   }
 
-  // Just start with a C scale for now
-  randomNote(): string {
-    const scale = ['C4', 'D4', 'E4', 'F4', 'G4', 'A4', 'B4'];
-    return scale[this.prng.rand(7)];
+  // Just start with a C major scale for now (C4 to B4)
+  randomPitch(): Pitch {
+    const limitedScale = pitches.filter((p) => p.pitch_name.endsWith('4') && !p.pitch_name.includes('#'));
+    return limitedScale[this.prng.rand(6)];
   }
 }

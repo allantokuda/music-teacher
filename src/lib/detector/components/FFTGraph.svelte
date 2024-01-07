@@ -1,17 +1,17 @@
 <script>
-  import { noteIndices } from '$lib/noteMap'
+  import { pitchIndices } from '$lib/pitch'
   export let highlight_locations = [];
   export let fft_gains = [];
 
-  function barColor(i, highlight_locations, noteIndices) {
+  function barColor(i, highlight_locations, pitchIndices) {
     return highlight_locations.includes(i) ? 'red' :
-           noteIndices.includes(i) ? 'gray' : '';
+           pitchIndices.includes(i) ? 'gray' : '';
   }
 </script>
 
 <div class="graph">
   {#each fft_gains.slice(0,400) as gain, i}
-    <div class="bar {barColor(i, highlight_locations, noteIndices)}"
+    <div class="bar {barColor(i, highlight_locations, pitchIndices)}"
          style="height: {250+gain}px;">
     </div>
   {/each}

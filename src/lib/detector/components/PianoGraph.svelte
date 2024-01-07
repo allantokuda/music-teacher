@@ -1,20 +1,20 @@
 <script>
-  export let note_gains = [];
-  export let highlight_note_numbers = [];
-  import { noteName } from '$lib/noteMap';
+  export let pitch_gains = [];
+  export let highlight_pitch_numbers = [];
+  import { pitchName } from '$lib/pitch';
 
-  function noteColor(noteNum) {
-    return noteName(noteNum).includes('#') ? 'black' : 'white';
+  function pitchColor(pitchNum) {
+    return pitchName(pitchNum).includes('#') ? 'black' : 'white';
   }
-  function noteHighlight(noteNum, highlight_note_numbers) {
-    return highlight_note_numbers.includes(noteNum) ? 'highlight' : '';
+  function pitchHighlight(pitchNum, highlight_pitch_numbers) {
+    return highlight_pitch_numbers.includes(pitchNum) ? 'highlight' : '';
   }
 </script>
 
 <div class="piano-graph">
-  {#each note_gains as gain, n}
-    <div class="bar {noteColor(n)} {noteHighlight(n, highlight_note_numbers)}" style="height: {300+gain}px;">
-      {noteName(n)}
+  {#each pitch_gains as gain, n}
+    <div class="bar {pitchColor(n)} {pitchHighlight(n, highlight_pitch_numbers)}" style="height: {300+gain}px;">
+      {pitchName(n)}
     </div>
   {/each}
 </div>

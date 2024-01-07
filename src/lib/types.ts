@@ -10,7 +10,14 @@ export interface PeakTrack {
   gain_steps: number[];
 }
 
-export interface Note {
-  note_num: number;
-  note_name: string;
+export interface Pitch {
+  pitch_num: number;
+  pitch_name: string;
+  freq: number;
+  fft_index: number;
+}
+
+export interface Measure {
+  easyScore: string;
+  notes: Pitch[];
 }
