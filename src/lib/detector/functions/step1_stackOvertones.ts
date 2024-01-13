@@ -11,7 +11,7 @@ function normalize(fftGains: number[]): number[] {
   // Work in the higher frequency half of the data which will mostly have uniform noise and avoids low-frequency artifacts
   const avgGain = fftGains.slice(1000, 2000).reduce((sum, gain) => sum + gain, 0) / 1000;
   const scale = avgGain / (1 + Math.log(1500)) * 0.5;
-  return fftGains.map((gain, i) => gain - (scale * (1 + Math.log(i))));
+  return fftGains.map((gain, i) => gain - (scale * (1 + Math.log(i+1))));
 }
 
 export default function step1_stackOvertones(fftGains: Float32Array): number[] {
