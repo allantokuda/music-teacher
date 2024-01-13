@@ -6,6 +6,7 @@ import step2_findPeaks      from './functions/step2_findPeaks'
 import step3_findPeakTracks from './functions/step3_findPeakTracks.js'
 import step4_findAttacks    from './functions/step4_findAttacks.js'
 import type { Pitch, Peak } from '$lib/types'
+import { lnCurveFit, normalize } from './functions/normalize.js'
 
 export interface DetectorData {
   fft_gains: number[]
@@ -16,6 +17,8 @@ export interface DetectorData {
   attack_fft_indices: number[]
   attack_pitch_numbers: number[]
 }
+
+const RISE_THRESHOLD = 10;
 
 export default class Detector {
   fftCallback: (fft_gains: DetectorData) => void = () => {};
@@ -40,18 +43,48 @@ export default class Detector {
     Tone.start()
     this.mic.open().then(() => {
       this.mic?.connect(fft)
+      let riseThresholdReached = false;
+
       let fft_gains_prev: number[] = [];
       let peak_history: Peak[][] = [];
+      let fft_diffs: number[];
+      let fft_diff_sum: number;
+      let baselineFit = { A: -Infinity, B: -Infinity };
+      let fitSampleValueMin = -Infinity;
+
       this.interval = setInterval(() => {
-        let fft_gains = step1_stackOvertones(fft.getValue());
+        let stacked_fft_gains = step1_stackOvertones(fft.getValue());
+
+        // Normalize to a running minimum baseline fit
+        let fit = lnCurveFit(stacked_fft_gains);
+        let fitSampleValue = fit.A + fit.B * Math.log(1000); // 1000 is arbitrary
+        if (fitSampleValue > fitSampleValueMin) {
+          fitSampleValueMin = fitSampleValue;
+          baselineFit = fit;
+        }
+        let fft_gains = normalize(stacked_fft_gains, baselineFit.A, baselineFit.B);
+
         let fft_peaks = step2_findPeaks(fft_gains.slice(0,2000), 20);
         let pitch_gains = pitchGains(fft_gains);
 
-        let fft_diffs: number[];
         if (fft_gains_prev) {
           fft_diffs = fft_gains.map((g, i) => g - fft_gains_prev[i])
         } else {
           fft_diffs = [];
+        }
+        fft_diff_sum = fft_diffs.reduce((sum, diff) => sum + diff, 0);
+        if (fft_diff_sum > RISE_THRESHOLD) {
+          if (!riseThresholdReached) {
+            console.log('Rise threshold reached', fft_diff_sum);
+          }
+          riseThresholdReached = true;
+        }
+        if (fft_diff_sum < 0 && riseThresholdReached) {
+          riseThresholdReached = false;
+          console.log('Sound detected!')
+          const maxGain = fft_gains.reduce((max, gain) => { return gain > max ? gain : max });
+          const gainThreshold = maxGain * 0.5;
+
         }
 
         peak_history.push(fft_peaks);
