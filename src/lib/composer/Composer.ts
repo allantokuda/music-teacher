@@ -19,10 +19,8 @@ export default class Composer {
       this.randomPitch()
     ]
     const pitchNames = notes.map((n) => n.pitch_name);
-    return {
-      easyScore: `${pitchNames[0]}/q, ${pitchNames[1]}, ${pitchNames[2]}, ${pitchNames[3]}`,
-      notes: notes,
-    }
+    const easyScore = `${pitchNames[0]}/q, ${pitchNames.slice(1).join(', ')}`;
+    return { easyScore, notes }
   }
 
   // Just start with a C major scale for now (C4 to B4)
