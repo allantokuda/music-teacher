@@ -1,0 +1,98 @@
+Get FFT:
+fft_gains: number[]: momentary fft calculation from microphone
+
+
+Stack Overtones:
+fft_gains_stacked: 8x overtone stacked version of fft_gains.
+This reduces the number of values by 8x from 16384 to 2048.
+Each result value is the sum of is corresponding input value and 7 overtone input values above it.
+2048 * 1.345 = 2756 Hz, which is the highest frequency pitch we can then process - approximately F7.
+
+
+Normalize:
+Fit a logarithmic curve to the fft_gains_stacked array, and subtract the curve.
+This removes the side effect of lower frequencies getting higher values due to the stacking step.
+
+
+Momentary Diff Sum:
+momentary_diff: sum of difference between current and previous fft_gains_stacked array
+
+
+Sound Event Trigger:
+When sum of diff rises above a RISE_THRESHOLD and then back down below zero, a sound is considered to have been (triggered).
+(Unknown yet if it was pitch or noise.)
+This is a stateful hysteresis check within the main interval loop, that is true ONLY when:
+  - the trigger was false in the previous loop;
+  - the diff is currently negative;
+  - the diff was previously was rising faster than RISE_THRESHOLD.
+  - where "previous" determination of rising of the threshold is cleared when the value becomes true
+
+
+Pitch Detection:
+
+Pitches create (very narrow) bell-shaped peaks in the FFT.
+In all the noise, mathematically there is a huge number of "peaks" of various sizes in an fft.
+The challenge is determining which ones are pitches.
+Pitches will have an overtone series, and each peak generally has a shape like a bell curve.
+They may not have the highest peak, but by detecting a series and by detecting peak shape, we can determine which peaks are pitches.
+It's a rather hard problem to figure out all of the pitches that were played without any knowledge of what to expect.
+It's a much easier problem to expect a specific set of pitches and check if they were played.
+This way we can look for peaks in specific places and ignore everything else.
+
+For out-of-tune instruments, one thing that can be done is to tune the search to the tune of the instrument by adjusting the search frequencies based on the frequencies that are actually heard.
+It should be sufficient to assume that the whole instrument is out of tune by the same amount and not have to adjust the search frequency for each pitch.
+However, for initial prototype we can develop assuming a perfectly tuned instrument.
+
+So, given a set of pitches, we can check if there is a overtone series for each.
+Presence of an overtone series means:
+- There is a peak at the tonic frequency
+- There is a peak at each of (at least the 2x and 3x) overtones (for the overtones that fall within the 2048 index range)
+- A peak will typically have an interpolated gain at that frequency is at least 10db higher than the interpolated gain at plus minus one quarter tone.
+
+However, noise and instrument timber can counteract this and make some overtones inaudible, so we cannot expect to necessary see all overtones.
+This makes it a challenge to determine what is a peak and what isn't. We can set a threshold but it will have lots of false positives and false negatives.
+
+It will not work well to check that there "IS" a peak at each frequency, because the peaks may be small and hard to detect.
+What ought to work better is checking that are NOT be other, more powerful peaks at other unexpected frequencies.
+So we can subtract out gaussian-fit curves from each expected frequency, and expect to see the overall FFT gain range to be dramatically reduced (by a threshold).
+
+So, the "only-expected-pitches-struck" algorithm is:
+  - Calculate a "gain threshold" that is 50% (TUNABLE) of the highest peak in the stacked/normalized FFT.
+  - LATER, MAYBE: Calculate the 95th (TUNABLE) percentile of the stacked/normalized FFT and compare to the gain threshold to decide if we are looking at pitches or noise
+  - For each pitch expected:
+    - For each of its overtones (and one or two under-tones) within the 2048 range:
+      - Fit a gaussian curve to the local FFT (using +/- 1/4 tone) such that the peak of the curve matches the interpolated FFT peak
+      - Subtract it out of the FFT
+  - After all the subtractions, expect that all remaining gains in the resulting FFT are now less than the gain threshold.
+    - If so, then only expected pitches were played and we return true.
+    - If not, then there were unexpected extra pitches played -- OR the sound was just noise! So, how to distinguish pitch from noise?
+
+The "not-noise" algorithm is:
+  - Continuing from the above subtracted-out FFT:
+  - 6 (TUNABLE) times:
+    - Find the highest remaining peak in the FFT
+    - For each of its overtones (and one or two under-tones) within the 2048 range:
+      - Fit a gaussian curve to the local FFT (using +/- 1/4 tone) such that the peak of the curve matches the interpolated FFT peak
+      - Subtract it out of the FFT
+    - After all the subtractions, check if all the remaining gains in the resulting FFT are now less than the gain threshold.
+      - If so, then the sound was pitches played.
+      - If not, then the sound was noise.
+
+
+Functional decomposition - what functions do we need?
+
+- 0. detector loop (setInterval, 30ms) that runs all the following repeatedly:
+- 1. gather raw FFT: number[] with 16384 length, gain values
+- 2. stack overtones: number[] with 2048 length, highly negative values that are not exactly "gain" anymore
+- 3. normalize: number[] with 2048 length, centered around value 0
+- 4. momentary diff: number that may be positive or negative representing whether sound is on the rise or fall
+- 5. sound event trigger: boolean (see above)
+- 6. "only-expected-pitches" filter: boolean - rejects the trigger if the sound includes unexpected pitches (see above)
+- 7. "not-noise" filter: boolean - rejects the trigger if the sound the sound includes too many unexpected pitches (see above)
+
+For 6 and 7, we need sub-functions:
+- subtract_peak(fft_values, peak_freq) -> new set of fft_values with a peak removed using gaussian curve
+  - gaussian_fit(fft_values, peak_freq) -> gaussian curve that fits the fft_values at the peak_freq
+    - gaussian_curve(mean, std_dev) -> generates a gaussian curve centered at x
+
+
