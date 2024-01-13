@@ -1,6 +1,6 @@
 import type { Pitch } from '$lib/types';
 const C2_Freq = 65.4;
-const SCALE = 1.345825195; // 22050 sample rate and 16384 fft size
+export const SCALE = 1.345825195; // 22050 sample rate and 16384 fft size
 const NOTE_RANGE = 60;
 const integer_series: number[] = new Array(NOTE_RANGE).fill(0).map((_, i) => i);
 export const pitchClasses = ['C','C#','D','D#','E','F','F#','G','G#','A','A#','B']
