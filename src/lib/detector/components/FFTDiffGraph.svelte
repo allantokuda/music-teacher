@@ -1,13 +1,31 @@
-<script>
+<script lang="ts">
   import { pitchIndices } from '$lib/pitch'
   export let fft_diffs = [];
+  let history: number[][] = [];
+  let diffSum: number[] = [];
+  $: {
+    history.push(fft_diffs.slice(0,400));
+    if (history.length > 10) {
+      history.shift();
+      diffSum = history.reduce((sums,momentaries) => {
+        if (!sums) {
+          return momentaries;
+        }
+        return sums.map((sum,i) => sum + momentaries[i]);
+      }, null);
+      //console.log(diffSum);
+    }
+  }
 </script>
 
 <div class="graph">
-{#each fft_diffs.slice(0,400) as diff, i}
-  <div class="bar {pitchIndices.includes(i) ? 'pitch' : ''} {diff > 0 ? 'up' : 'down'}" style="height: {Math.abs(diff)*10}px;">
-  </div>
-{/each}
+{#if diffSum.length > 0}
+  {#each diffSum as diff, i}
+    <div class="bar {pitchIndices.includes(i) ? 'pitch' : ''} {diff > 0 ? 'up' : 'down'}" style="height: {Math.abs(diff)}px;">
+    </div>
+  {/each}
+{/if}
+{ fft_diffs.slice(0,400).reduce((a,b) => a+b, 0) > 300 }
 </div>
 
 
