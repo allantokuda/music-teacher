@@ -1,0 +1,13 @@
+Components:
+- detector: process FFT data to detect notes being struck
+- quizzer: game that present a sequence of notes/chords to the user. As the correct notes are detected, proceed to the next.
+- composer: choose a sequence of notes to present to the user. Use historical data to predict the best notes to quiz. Similar to Anki.
+- logger: record everything that occurred in context so the composer can adapt
+- syllabus: a list of progressively difficult concepts to guide what the composer focuses on. For example it should start with C/G/F chords rather than jumping right into G#.
+
+Development plan:
+- get detector to a B grade of accuracy so it begins to be useful
+- write a basic composer that chooses randomly from a subset of hard coded notes/chords
+- write a quizzer game using the above
+- iterate on the detector to improve accuracy and feel of the game
+
