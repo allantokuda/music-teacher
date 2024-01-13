@@ -18,7 +18,8 @@ export interface DetectorData {
   attack_pitch_numbers: number[]
 }
 
-const RISE_THRESHOLD = 10;
+const RISE_THRESHOLD = 100;
+const DROP_THRESHOLD = 60;
 
 export default class Detector {
   fftCallback: (fft_gains: DetectorData) => void = () => {};
@@ -74,12 +75,12 @@ export default class Detector {
         }
         fft_diff_sum = fft_diffs.reduce((sum, diff) => sum + diff, 0);
         if (fft_diff_sum > RISE_THRESHOLD) {
-          if (!riseThresholdReached) {
-            console.log('Rise threshold reached', fft_diff_sum);
-          }
+          // if (!riseThresholdReached) {
+          //   console.log('Rise threshold reached', fft_diff_sum);
+          // }
           riseThresholdReached = true;
         }
-        if (fft_diff_sum < 0 && riseThresholdReached) {
+        if (fft_diff_sum < DROP_THRESHOLD && riseThresholdReached) {
           riseThresholdReached = false;
           console.log('Sound detected!')
           const maxGain = fft_gains.reduce((max, gain) => { return gain > max ? gain : max });
