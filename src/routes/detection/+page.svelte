@@ -9,6 +9,7 @@
   let detector;
   let data = {};
   let isListening = false;
+  let buttonLabel = 'Start';
 
   if (browser) {
     detector = new Detector();
@@ -27,14 +28,22 @@
     isListening = false;
   }
 
+  function toggle() {
+    if (isListening) {
+      stop();
+      buttonLabel = 'Start';
+    } else {
+      start();
+      buttonLabel = 'Stop';
+    }
+  }
+
 </script>
 
 <div class="controls">
-  {#if isListening}
-    <button on:click={stop}>Stop</button>
-  {:else}
-    <button on:click={start}>Start</button>
-  {/if}
+  <button on:click={toggle}>
+    {buttonLabel}
+  </button>
 </div>
 
 <PianoGraph pitch_gains={data.pitch_gains} highlight_pitch_numbers={data.attack_pitch_numbers} />
