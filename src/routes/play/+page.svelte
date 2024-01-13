@@ -34,11 +34,11 @@
     document.querySelectorAll('#output svg').forEach((elem) => elem.remove());
     setTimeout(() => {
       const vf = new Factory({
-        renderer: { elementId: 'output', width: 200, height: 200 },
+        renderer: { elementId: 'output', width: 240, height: 240 },
       });
 
-      let x = 0;
-      let y = 0;
+      let x = 20;
+      let y = 10;
 
       function appendSystem(width: number) {
         const system = vf.System({ x, y, width, spaceBetweenStaves: 10 });
@@ -51,7 +51,7 @@
       const notes = score.notes.bind(score);
       const beam = score.beam.bind(score);
 
-      let system = appendSystem(200);
+      let system = appendSystem(198);
       system.addStave({
         voices: [
           voice(
@@ -60,15 +60,10 @@
         ]
       }).addClef('treble');
 
-      // Playing with adding a 2nd measure later
-      /* system = appendSystem(150); */
-      /* system.addStave({ */
-      /*   voices: [ */
-      /*     voice( */
-      /*       notes(measure.easyScore, { stem: 'up' }), */
-      /*     ), */
-      /*   ] */
-      /* }); */
+      system.addStave({
+        voices: [
+        ]
+      }).addClef('bass');
 
       vf.draw();
     });
@@ -97,7 +92,7 @@
   });
 </script>
 
-<div id="output">
+<div id="output" class="vexflow">
   <span class="hidden">{currentNote.pitch_name}</span>
 </div>
 
