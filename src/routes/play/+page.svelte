@@ -1,4 +1,4 @@
-<script>
+<script lang="ts">
   import { browser } from '$app/environment';
   import Vex from 'vexflow';
   import Detector from '$lib/detector/Detector.ts';
@@ -34,23 +34,41 @@
     document.querySelectorAll('#output svg').forEach((elem) => elem.remove());
     setTimeout(() => {
       const vf = new Factory({
-        renderer: { elementId: 'output', width: 500, height: 200 },
+        renderer: { elementId: 'output', width: 200, height: 200 },
       });
 
-      const score = vf.EasyScore();
-      const system = vf.System();
+      let x = 0;
+      let y = 0;
 
-      let note_code = `${currentNote.pitch_name}/w`;
-      let voices = [
-        score.voice(score.notes(measure.easyScore, { stem: 'up' })),
-      ];
-      /* if (heardNote) { */
-      /*   heard_note_code = `${heardNote.pitch_name}/w`; */
-      /*   voices.push(score.voice(score.notes(heard_note_code, { stem: 'down' }))); */
-      /* } */
-      system
-        .addStave({ voices })
-        .addClef('treble')
+      function appendSystem(width: number) {
+        const system = vf.System({ x, y, width, spaceBetweenStaves: 10 });
+        x += width;
+        return system;
+      }
+
+      const score = vf.EasyScore({ throwOnError: true });
+      const voice = score.voice.bind(score);
+      const notes = score.notes.bind(score);
+      const beam = score.beam.bind(score);
+
+      let system = appendSystem(200);
+      system.addStave({
+        voices: [
+          voice(
+            notes(measure.easyScore, { stem: 'up' }),
+          ),
+        ]
+      }).addClef('treble');
+
+      // Playing with adding a 2nd measure later
+      /* system = appendSystem(150); */
+      /* system.addStave({ */
+      /*   voices: [ */
+      /*     voice( */
+      /*       notes(measure.easyScore, { stem: 'up' }), */
+      /*     ), */
+      /*   ] */
+      /* }); */
 
       vf.draw();
     });
@@ -85,4 +103,12 @@
 
 <style>
   .hidden { display: none; }
+  #output {
+    height: 100%;
+    display: flex;
+    flex-grow: 1;
+    flex-direction: row;
+    justify-content: center;
+    align-items: center;
+  }
 </style>
