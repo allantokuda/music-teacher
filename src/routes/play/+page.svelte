@@ -87,6 +87,17 @@
       } else {
         svgNotes[i].classList.remove('played');
       }
+
+      if (i === currentNoteIndex - 1) {
+        let noteHead = svgNotes[i].querySelector('.vf-notehead path');
+        let ripple = noteHead.cloneNode(true);
+        noteHead.parentNode.appendChild(ripple);
+        let bbox = ripple.getBBox();
+        let xCenter = bbox.x + bbox.width / 2;
+        let yCenter = bbox.y + bbox.height / 2;
+        ripple.setAttribute('transform-origin', `${xCenter} ${yCenter}`);
+        ripple.classList.add('ripple');
+      }
     }
   }
 
