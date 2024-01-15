@@ -3,6 +3,7 @@ import * as Tone from 'tone'
 import { pitches, pitchGains, pitchNumForIndex, SCALE } from '$lib/pitch'
 import step1_stackOvertones from './functions/step1_stackOvertones.js'
 import subtractOvertones    from './functions/subtractOvertones.js'
+import { fftMaxGain, findGaussianPeaks } from './functions/subtractOvertones.js'
 import step2_findPeaks      from './functions/step2_findPeaks'
 import step3_findPeakTracks from './functions/step3_findPeakTracks.js'
 import step4_findAttacks    from './functions/step4_findAttacks.js'
@@ -22,14 +23,6 @@ export interface DetectorData {
 
 const RISE_THRESHOLD = 200;
 const DROP_THRESHOLD = 100;
-
-function fftMaxGain(fft_gains: number[]): { maxGain: number, maxIndex: number } {
-  return fft_gains.reduce(
-    (max: { maxGain: number, maxIndex: number }, gain: number, i: number) => {
-      return gain > max.maxGain ? { maxGain: gain, maxIndex: i } : max;
-    }, { maxGain: -Infinity, maxIndex: -1 }
-  );
-}
 
 export default class Detector {
   fftCallback: (fft_gains: DetectorData) => void = () => {};
@@ -59,6 +52,7 @@ export default class Detector {
       let fft_gains_prev: number[] = [];
       let fft_gains_normalized: number[] = [];
       let fft_gains_copy_to_remove_peaks: number[] = [];
+      let fft_gains_copy_to_remove_expected_peaks: number[] = [];
       let peak_history: Peak[][] = [];
       let fft_diffs: number[];
       let fft_diff_sum: number;
@@ -89,24 +83,25 @@ export default class Detector {
           let fit = lnCurveFit(fft_gains);
           fft_gains_normalized = normalize(fft_gains, fit.A, fit.B);
 
+          // let peaks = findGaussianPeaks(fft_gains_normalized);
+          // console.log(peaks.map((p) => `${p.index}\t${p.gain.toFixed(3)}`).join('\n'));
+
           fft_gains_copy_to_remove_peaks = fft_gains_normalized.slice();
 
-          let { maxGain, maxIndex } = fftMaxGain(fft_gains_normalized);
-          let currentMaxIndex = maxIndex;
-          let reducedMaxGain = maxGain;
+          let max = fftMaxGain(fft_gains_normalized);
+
           // Remove several peaks and their overtones
-          for (let i = 0; i < 12; i++) {
-            subtractOvertones(fft_gains_copy_to_remove_peaks, currentMaxIndex * SCALE);
-            let max = fftMaxGain(fft_gains_copy_to_remove_peaks);
-            currentMaxIndex = max.maxIndex;
-            reducedMaxGain = max.maxGain;
+          let reducedMax = max;
+          for (let i = 0; i < 10; i++) {
+            subtractOvertones(fft_gains_copy_to_remove_peaks, reducedMax.index * SCALE);
+            reducedMax = fftMaxGain(fft_gains_copy_to_remove_peaks);
           }
 
-          let reducedFraction = (reducedMaxGain / maxGain);
-          if (reducedFraction < 0.6) {
+          let reducedFraction = (reducedMax.gain / max.gain);
+          if (reducedFraction < 0.45) {
             // console.log(fft_gains_copy_to_remove_peaks.map((g, i) => `${fft_gains_normalized[i].toFixed(1)}\t${g.toFixed(1)}`).join('\n'));
             console.log(reducedFraction.toFixed(2), 'Pitches detected!')
-            //fft_gains_copy_to_remove_expected_peaks = fft_gain_normalizeds.slice();
+            fft_gains_copy_to_remove_expected_peaks = fft_gains_normalized.slice();
           } else {
             //console.log(fft_gains_copy_to_remove_peaks.map((g, i) => `${fft_gain_normalizeds[i].toFixed(0)}\t${g.toFixed(0)}`).join('\n'));
             console.log(reducedFraction.toFixed(2), '-- noise --')

@@ -4,6 +4,11 @@ export interface Peak {
   height: number;
 }
 
+export interface FFTPoint {
+  index: number
+  gain: number
+}
+
 export interface PeakTrack {
   index: number;
   gains: number[];
