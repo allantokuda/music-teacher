@@ -13,12 +13,16 @@
   let currentNote = measure.notes[currentNoteIndex];
   let heardNote = null;
 
-  if (browser) {
+  let buttonLabel = 'Start';
+  let isListening = false;
+
+  function start() {
     displayNotes();
 
     detector = new Detector();
     detector.listenFor([currentNote.freq]);
     detector.start();
+    isListening = true;
     detector.onNote((note) => {
       /* if (note.pitch_num === currentNote.pitch_num) { */
         updateNote();
@@ -28,7 +32,6 @@
         /* console.log(`Heard ${note.pitch_name}, looking for ${currentNote.pitch_name}`); */
       /* } */
     });
-
   }
 
   function displayNotes() {
@@ -102,9 +105,31 @@
   }
 
   onDestroy(() => {
-    detector?.stop();
+    stop();
   });
+
+  function stop() {
+    detector?.stop();
+    isListening = false;
+  }
+
+  function toggle() {
+    if (isListening) {
+      stop();
+      buttonLabel = 'Start';
+    } else {
+      start();
+      buttonLabel = 'Stop';
+    }
+  }
 </script>
+
+
+<div class="controls">
+  <button on:click={toggle}>
+    {buttonLabel}
+  </button>
+</div>
 
 <div id="output" class="vexflow">
   <span class="hidden">{currentNote.pitch_name}</span>
