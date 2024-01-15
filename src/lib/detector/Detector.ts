@@ -27,6 +27,7 @@ const DROP_THRESHOLD = 100;
 export default class Detector {
   fftCallback: (fft_gains: DetectorData) => void = () => {};
   noteCallback: (pitch: Pitch) => void = () => {};
+  listenForFreqs: number[] = pitches.slice(12,36).map((p) => p.freq);
 
   private interval: ReturnType<typeof setInterval> | undefined = undefined;
   private mic: Tone.UserMedia | null = null;
@@ -100,8 +101,20 @@ export default class Detector {
           let reducedFraction = (reducedMax.gain / max.gain);
           if (reducedFraction < 0.45) {
             // console.log(fft_gains_copy_to_remove_peaks.map((g, i) => `${fft_gains_normalized[i].toFixed(1)}\t${g.toFixed(1)}`).join('\n'));
-            console.log(reducedFraction.toFixed(2), 'Pitches detected!')
             fft_gains_copy_to_remove_expected_peaks = fft_gains_normalized.slice();
+
+            // Now see if the expected pitches stand alone
+            this.listenForFreqs.forEach((freq) => {
+              subtractOvertones(fft_gains_copy_to_remove_expected_peaks, freq);
+            });
+            let reducedMax = fftMaxGain(fft_gains_copy_to_remove_expected_peaks);
+            let reducedFraction = (reducedMax.gain / max.gain);
+            if (reducedFraction < 0.65) {
+              console.log(reducedFraction.toFixed(2), 'Expected pitches detected!')
+            } else {
+              console.log(reducedFraction.toFixed(2), 'Pitches detected (some not expected)')
+            }
+
           } else {
             //console.log(fft_gains_copy_to_remove_peaks.map((g, i) => `${fft_gain_normalizeds[i].toFixed(0)}\t${g.toFixed(0)}`).join('\n'));
             console.log(reducedFraction.toFixed(2), '-- noise --')
@@ -143,6 +156,10 @@ export default class Detector {
         fft_gains_prev = fft_gains;
       }, 30)
     })
+  }
+
+  listenFor(freqs: number[]): void {
+    this.listenForFreqs = freqs;
   }
 
   stop(): void {
