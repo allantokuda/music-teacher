@@ -12,7 +12,7 @@
 <div class="graph">
   {#each fft_gains.slice(0,1200) as gain, i}
     <div class="bar {barColor(i, highlight_locations, pitchIndices)}"
-         style="height: {100+gain}px;">
+         style="height: {10+gain}px;">
     </div>
   {/each}
 </div>

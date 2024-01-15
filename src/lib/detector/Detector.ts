@@ -11,6 +11,7 @@ import { lnCurveFit, normalize } from './functions/normalize.js'
 
 export interface DetectorData {
   fft_gains: number[]
+  fft_gains_minus_peaks: number[]
   fft_diffs: number[]
   pitch_gains: number[]
   fft_peaks: Peak[]
@@ -56,25 +57,14 @@ export default class Detector {
       let riseThresholdReached = false;
 
       let fft_gains_prev: number[] = [];
+      let fft_gains_normalized: number[] = [];
+      let fft_gains_copy_to_remove_peaks: number[] = [];
       let peak_history: Peak[][] = [];
       let fft_diffs: number[];
       let fft_diff_sum: number;
-      let baselineFit = { A: -Infinity, B: -Infinity };
-      let fitSampleValueMin = -Infinity;
 
       this.interval = setInterval(() => {
-        let stacked_fft_gains = step1_stackOvertones(fft.getValue());
-
-        // Normalize to a running minimum baseline fit
-        let fit = lnCurveFit(stacked_fft_gains);
-        let fitSampleValue = fit.A + fit.B * Math.log(1000); // 1000 is arbitrary
-        if (fitSampleValue > fitSampleValueMin) {
-          fitSampleValueMin = fitSampleValue;
-          baselineFit = fit;
-        }
-        let fft_gains = normalize(stacked_fft_gains, baselineFit.A, baselineFit.B);
-        let fft_gains_copy_to_remove_peaks = fft_gains.slice();
-        let fft_gains_copy_to_remove_expected_peaks = fft_gains.slice();
+        let fft_gains = step1_stackOvertones(fft.getValue());
 
         let fft_peaks = step2_findPeaks(fft_gains.slice(0,2000), 20);
         let pitch_gains = pitchGains(fft_gains);
@@ -91,24 +81,35 @@ export default class Detector {
           // }
           riseThresholdReached = true;
         }
+
         if (fft_diff_sum < DROP_THRESHOLD && riseThresholdReached) {
           riseThresholdReached = false;
 
-          let { maxGain, maxIndex } = fftMaxGain(fft_gains);
-          let gainThreshold = maxGain * 0.7;
+          // Normalize to a flat baseline using an logarithmic curve fit
+          let fit = lnCurveFit(fft_gains);
+          fft_gains_normalized = normalize(fft_gains, fit.A, fit.B);
+
+          fft_gains_copy_to_remove_peaks = fft_gains_normalized.slice();
+
+          let { maxGain, maxIndex } = fftMaxGain(fft_gains_normalized);
+          let currentMaxIndex = maxIndex;
+          let reducedMaxGain = maxGain;
           // Remove several peaks and their overtones
           for (let i = 0; i < 12; i++) {
-            subtractOvertones(fft_gains_copy_to_remove_peaks, maxIndex * SCALE);
+            subtractOvertones(fft_gains_copy_to_remove_peaks, currentMaxIndex * SCALE);
             let max = fftMaxGain(fft_gains_copy_to_remove_peaks);
-            maxGain = max.maxGain;
+            currentMaxIndex = max.maxIndex;
+            reducedMaxGain = max.maxGain;
           }
 
-          if (maxGain < gainThreshold) {
-            console.log(fft_gains_copy_to_remove_peaks.map((g, i) => `${fft_gains[i]}\t${g.toFixed(2)}`).join('\n'));
-            console.log('Pitches detected!')
+          let reducedFraction = (reducedMaxGain / maxGain);
+          if (reducedFraction < 0.6) {
+            // console.log(fft_gains_copy_to_remove_peaks.map((g, i) => `${fft_gains_normalized[i].toFixed(1)}\t${g.toFixed(1)}`).join('\n'));
+            console.log(reducedFraction.toFixed(2), 'Pitches detected!')
+            //fft_gains_copy_to_remove_expected_peaks = fft_gain_normalizeds.slice();
           } else {
-            console.log(fft_gains_copy_to_remove_peaks.map((g, i) => `${fft_gains[i]}\t${g.toFixed(2)}`).join('\n'));
-            console.log('-- noise --')
+            //console.log(fft_gains_copy_to_remove_peaks.map((g, i) => `${fft_gain_normalizeds[i].toFixed(0)}\t${g.toFixed(0)}`).join('\n'));
+            console.log(reducedFraction.toFixed(2), '-- noise --')
           }
         }
 
@@ -133,7 +134,8 @@ export default class Detector {
 
         if (this.fftCallback) {
           this.fftCallback({
-            fft_gains: fft_gains_copy_to_remove_peaks,
+            fft_gains: fft_gains_normalized,
+            fft_gains_minus_peaks: fft_gains_copy_to_remove_peaks,
             fft_diffs,
             pitch_gains,
             fft_peaks,
