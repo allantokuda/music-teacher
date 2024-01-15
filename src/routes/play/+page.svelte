@@ -74,34 +74,29 @@
   }
 
   function updateNote() {
-    currentNoteIndex = (currentNoteIndex + 1) % 4 // loop back to beginning for now
-    if (currentNoteIndex === 0) {
-      measure = composer.writeMeasure();
-      displayNotes();
-    }
-    currentNote = measure.notes[currentNoteIndex];
-    console.log('next listening for', currentNote);
-    detector.listenFor([currentNote.freq]);
-
     const svgNotes = document.querySelectorAll('.vf-stavenote');
-    for (let i = 0; i < svgNotes.length; i++) {
-      if (i < currentNoteIndex) {
-        svgNotes[i].classList.add('played');
-      } else {
-        svgNotes[i].classList.remove('played');
-      }
+    const note = svgNotes[currentNoteIndex]
+    note.classList.add('played');
 
-      if (i === currentNoteIndex - 1) {
-        let noteHead = svgNotes[i].querySelector('.vf-notehead path');
-        let ripple = noteHead.cloneNode(true);
-        noteHead.parentNode.appendChild(ripple);
-        let bbox = ripple.getBBox();
-        let xCenter = bbox.x + bbox.width / 2;
-        let yCenter = bbox.y + bbox.height / 2;
-        ripple.setAttribute('transform-origin', `${xCenter} ${yCenter}`);
-        ripple.classList.add('ripple');
+    let noteHead = note.querySelector('.vf-notehead path');
+    let ripple = noteHead.cloneNode(true);
+    noteHead.parentNode.appendChild(ripple);
+    let bbox = ripple.getBBox();
+    let xCenter = bbox.x + bbox.width / 2;
+    let yCenter = bbox.y + bbox.height / 2;
+    ripple.setAttribute('transform-origin', `${xCenter} ${yCenter}`);
+    ripple.classList.add('ripple');
+
+    setTimeout(() => {
+      currentNoteIndex = (currentNoteIndex + 1) % 4 // loop back to beginning for now
+      if (currentNoteIndex === 0) {
+        measure = composer.writeMeasure();
+        displayNotes();
       }
-    }
+      currentNote = measure.notes[currentNoteIndex];
+      console.log('next listening for', currentNote);
+      detector.listenFor([currentNote.freq]);
+    }, 400);
   }
 
   onDestroy(() => {
