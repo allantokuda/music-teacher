@@ -17,15 +17,16 @@
     displayNotes();
 
     detector = new Detector();
+    detector.listenFor([currentNote.freq]);
     detector.start();
     detector.onNote((note) => {
-      if (note.pitch_num === currentNote.pitch_num) {
+      /* if (note.pitch_num === currentNote.pitch_num) { */
         updateNote();
-        console.log(`HIT ${note.pitch_name}`);
-      } else {
-        //displayNotes();
-        console.log(`Heard ${note.pitch_name}, looking for ${currentNote.pitch_name}`);
-      }
+        /* console.log(`HIT ${note.pitch_name}`); */
+      /* } else { */
+        /* //displayNotes(); */
+        /* console.log(`Heard ${note.pitch_name}, looking for ${currentNote.pitch_name}`); */
+      /* } */
     });
 
   }
@@ -76,6 +77,8 @@
       displayNotes();
     }
     currentNote = measure.notes[currentNoteIndex];
+    console.log('next listening for', currentNote);
+    detector.listenFor([currentNote.freq]);
 
     const svgNotes = document.querySelectorAll('.vf-stavenote');
     for (let i = 0; i < svgNotes.length; i++) {

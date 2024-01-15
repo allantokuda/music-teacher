@@ -27,7 +27,7 @@ const DROP_THRESHOLD = 100;
 export default class Detector {
   fftCallback: (fft_gains: DetectorData) => void = () => {};
   noteCallback: (pitch: Pitch) => void = () => {};
-  listenForFreqs: number[] = pitches.slice(12,36).map((p) => p.freq);
+  listenForFreqs: number[] = pitches.slice(24,25).map((p) => p.freq);
 
   private interval: ReturnType<typeof setInterval> | undefined = undefined;
   private mic: Tone.UserMedia | null = null;
@@ -111,6 +111,7 @@ export default class Detector {
             let reducedFraction = (reducedMax.gain / max.gain);
             if (reducedFraction < 0.65) {
               console.log(reducedFraction.toFixed(2), 'Expected pitches detected!')
+              this.noteCallback(null);
             } else {
               console.log(reducedFraction.toFixed(2), 'Pitches detected (some not expected)')
             }
@@ -137,7 +138,7 @@ export default class Detector {
 
         if (attack_pitch_numbers.length > 0) {
           const pitch_num = attack_pitch_numbers[0];
-          this.noteCallback(pitches[pitch_num]);
+          //this.noteCallback(pitches[pitch_num]);
         }
 
         if (this.fftCallback) {
