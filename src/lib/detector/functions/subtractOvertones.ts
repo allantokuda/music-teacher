@@ -8,9 +8,9 @@ function gaussian(x: number, mean: number, std: number): number {
 
 // Pass gains array by reference and modify it in place
 function subtractGaussianPeak(fft_gains: number[], freq: number): void {
-  const center_index = Math.floor(freq / SCALE);
-  const min_index = Math.floor(freq * 0.97 / SCALE);
-  const max_index = Math.floor(freq * 1.03 / SCALE);
+  const center_index = Math.round(freq / SCALE);
+  const min_index = Math.round(freq * 0.97 / SCALE);
+  const max_index = Math.round(freq * 1.03 / SCALE);
   if (min_index > fft_gains.length - 1) { return; }
   const center_gain = fft_gains[center_index];
   const std = PEAK_STANDARD_DEVIATION_SCALE * center_index;
