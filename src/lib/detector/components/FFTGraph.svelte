@@ -4,15 +4,20 @@
   export let fft_gains = [];
 
   function barColor(i, highlight_locations, pitchIndices) {
-    return highlight_locations.includes(i) ? 'red' :
-           pitchIndices.includes(i) ? 'gray' : '';
+    if (highlight_locations.includes(i)) {
+      return 'red';
+    } else if (pitchIndices.includes(i)) {
+      return 'gray';
+    /* } else if (i % 100 === 0) { */
+    /*   return 'gray'; */
+    }
   }
 </script>
 
 <div class="graph">
   {#each fft_gains.slice(0,1200) as gain, i}
     <div class="bar {barColor(i, highlight_locations, pitchIndices)}"
-         style="height: {10+gain}px;">
+         style="height: {20+gain}px;">
     </div>
   {/each}
 </div>
@@ -22,7 +27,7 @@
     display: flex;
     flex-direction: row;
     align-items: flex-end;
-    height: 200px;
+    height: 70px;
   }
   .bar {
     width: 1px;
@@ -37,6 +42,6 @@
     background-color: red;
   }
   .bar.gray {
-    background-color: gray;
+    background-color: #999;
   }
 </style>
