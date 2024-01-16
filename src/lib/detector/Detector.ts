@@ -76,10 +76,6 @@ export default class Detector {
         }
         fft_diff_sum = fft_diffs.reduce((sum, diff) => sum + diff, 0);
         if (fft_diff_sum > RISE_THRESHOLD) {
-          // if (!riseThresholdReached) {
-          //   this.debugCallback(`rose to ${fft_diff_sum}`);
-          //   console.log('Rise threshold reached', fft_diff_sum);
-          // }
           riseThresholdReached = true;
         }
 
@@ -91,9 +87,6 @@ export default class Detector {
           fft_gains_normalized = normalize(fft_gains, fit.A, fit.B);
           this.debugCallback(`fft norm size ${fft_gains_normalized.length}`);
 
-          // let peaks = findGaussianPeaks(fft_gains_normalized);
-          // console.log(peaks.map((p) => `${p.index}\t${p.gain.toFixed(3)}`).join('\n'));
-
           fft_gains_copy_to_remove_peaks = fft_gains_normalized.slice();
 
           let max = fftMaxGain(fft_gains_normalized);
@@ -101,31 +94,40 @@ export default class Detector {
           // Remove several peaks and their overtones
           let reducedMax = max;
           for (let i = 0; i < 10; i++) {
-            subtractOvertones(fft_gains_copy_to_remove_peaks, reducedMax.index * SCALE);
+            subtractOvertones(fft_gains_copy_to_remove_peaks, reducedMax.index * SCALE, null);
             reducedMax = fftMaxGain(fft_gains_copy_to_remove_peaks);
           }
 
-          let reducedFraction = (reducedMax.gain / max.gain);
-          if (reducedFraction < 0.45) {
+          let noiseReducedFraction = (reducedMax.gain / max.gain);
+          let pitchReducedFraction;
+
+          if (noiseReducedFraction > 0.45) {
+            //console.log(fft_gains_copy_to_remove_peaks.map((g, i) => `${fft_gain_normalizeds[i].toFixed(0)}\t${g.toFixed(0)}`).join('\n'));
+            console.log(noiseReducedFraction.toFixed(2), '-- noise --')
+            // this.debugCallback(`noise ${noiseReducedFraction.toFixed(2)}`);
+
+          } else {
+
             // console.log(fft_gains_copy_to_remove_peaks.map((g, i) => `${fft_gains_normalized[i].toFixed(1)}\t${g.toFixed(1)}`).join('\n'));
             fft_gains_copy_to_remove_expected_peaks = fft_gains_normalized.slice();
 
             // Now see if the expected pitches stand alone
             this.listenForFreqs.forEach((freq) => {
+              // this.debugCallback(`freq ${freq.toFixed(2)}`);
               subtractOvertones(fft_gains_copy_to_remove_expected_peaks, freq);
             });
             let reducedMax = fftMaxGain(fft_gains_copy_to_remove_expected_peaks);
-            let reducedFraction = (reducedMax.gain / max.gain);
-            if (reducedFraction < 0.65) {
-              console.log(reducedFraction.toFixed(2), 'Expected pitches detected!')
+            pitchReducedFraction = (reducedMax.gain / max.gain);
+
+            if (pitchReducedFraction < 0.65) {
+              console.log(pitchReducedFraction.toFixed(2), 'Expected pitches detected!')
               this.noteCallback(null);
+              // this.debugCallback(`pitchReducedFraction+ ${pitchReducedFraction.toFixed(2)}`);
             } else {
-              console.log(reducedFraction.toFixed(2), 'Pitches detected (some not expected)')
+              console.log(pitchReducedFraction.toFixed(2), 'Pitches detected (some not expected)')
+              // this.debugCallback(`pitchReducedFraction- ${pitchReducedFraction.toFixed(6)}`);
             }
 
-          } else {
-            //console.log(fft_gains_copy_to_remove_peaks.map((g, i) => `${fft_gain_normalizeds[i].toFixed(0)}\t${g.toFixed(0)}`).join('\n'));
-            console.log(reducedFraction.toFixed(2), '-- noise --')
           }
         }
 
@@ -151,7 +153,7 @@ export default class Detector {
         if (this.fftCallback) {
           this.fftCallback({
             fft_gains: fft_gains_normalized,
-            fft_gains_minus_peaks: fft_gains_copy_to_remove_peaks,
+            fft_gains_minus_peaks: fft_gains_copy_to_remove_expected_peaks,
             fft_diffs,
             pitch_gains,
             fft_peaks,

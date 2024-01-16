@@ -17,6 +17,7 @@ function subtractGaussianPeak(fft_gains: number[], freq: number): void {
   const max_index = Math.round(freq * 1.03 / SCALE);
   if (min_index > fft_gains.length - 1) { return; }
   const center_gain = fft_gains[center_index];
+  if (center_gain < 0) { return; }
   const std = PEAK_STANDARD_DEVIATION_SCALE * center_index;
   for (let i = min_index; i <= Math.min(fft_gains.length - 1, max_index); i++) {
     fft_gains[i] -= gaussian(i, center_index, std) * center_gain;

@@ -13,6 +13,7 @@
 
   if (browser) {
     detector = new Detector();
+    detector.listenFor([440]);
     detector.onFFTData((returnData) => {
       data = returnData;
     });
