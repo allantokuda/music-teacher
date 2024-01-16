@@ -27,6 +27,7 @@ const DROP_THRESHOLD = 100;
 export default class Detector {
   fftCallback: (fft_gains: DetectorData) => void = () => {};
   noteCallback: (pitch: Pitch) => void = () => {};
+  debugCallback: (msg: string) => void = () => {};
   listenForFreqs: number[] = pitches.slice(24,25).map((p) => p.freq);
 
   private interval: ReturnType<typeof setInterval> | undefined = undefined;
@@ -40,6 +41,10 @@ export default class Detector {
 
   onNote(callback: (pitch: Pitch) => void) {
     this.noteCallback = callback;
+  }
+
+  onDebugInfo(callback: (msg: string) => void) {
+    this.debugCallback = callback;
   }
 
   start(): void {
@@ -72,6 +77,7 @@ export default class Detector {
         fft_diff_sum = fft_diffs.reduce((sum, diff) => sum + diff, 0);
         if (fft_diff_sum > RISE_THRESHOLD) {
           // if (!riseThresholdReached) {
+          //   this.debugCallback(`rose to ${fft_diff_sum}`);
           //   console.log('Rise threshold reached', fft_diff_sum);
           // }
           riseThresholdReached = true;
@@ -83,6 +89,7 @@ export default class Detector {
           // Normalize to a flat baseline using an logarithmic curve fit
           let fit = lnCurveFit(fft_gains);
           fft_gains_normalized = normalize(fft_gains, fit.A, fit.B);
+          this.debugCallback(`fft norm size ${fft_gains_normalized.length}`);
 
           // let peaks = findGaussianPeaks(fft_gains_normalized);
           // console.log(peaks.map((p) => `${p.index}\t${p.gain.toFixed(3)}`).join('\n'));

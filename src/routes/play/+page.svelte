@@ -16,6 +16,8 @@
   let buttonLabel = 'Start';
   let isListening = false;
 
+  let debugInfo = [];
+
   function start() {
     displayNotes();
 
@@ -23,6 +25,14 @@
     detector.listenFor([currentNote.freq]);
     detector.start();
     isListening = true;
+    detector.onDebugInfo((info) => {
+      debugInfo.push(info);
+      if (debugInfo.length > 10) {
+        debugInfo.shift();
+      }
+      debugInfo = debugInfo; // for svelte
+      console.log(debugInfo);
+    });
     detector.onNote((note) => {
       /* if (note.pitch_num === currentNote.pitch_num) { */
         updateNote();
@@ -125,6 +135,11 @@
     {buttonLabel}
   </button>
 </div>
+<div class="debug-info">
+  {#each debugInfo as info}
+    <p>{info}</p>
+  {/each}
+</div>
 
 <div id="output" class="vexflow">
   <span class="hidden">{currentNote.pitch_name}</span>
@@ -139,5 +154,10 @@
     flex-direction: row;
     justify-content: center;
     align-items: center;
+  }
+  .debug-info p {
+    font-size: 12px;
+    margin: 0;
+    line-height: 1;
   }
 </style>
