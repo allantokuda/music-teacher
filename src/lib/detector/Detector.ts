@@ -3,7 +3,7 @@ import * as Tone from 'tone'
 import { pitches, pitchGains, pitchNumForIndex, SCALE } from '$lib/pitch'
 import step1_stackOvertones from './functions/step1_stackOvertones.js'
 import subtractOvertones    from './functions/subtractOvertones.js'
-import { fftMaxGain, findGaussianPeaks } from './functions/subtractOvertones.js'
+import { fftMaxGain } from './functions/subtractOvertones.js'
 import step2_findPeaks      from './functions/step2_findPeaks'
 import step3_findPeakTracks from './functions/step3_findPeakTracks.js'
 import step4_findAttacks    from './functions/step4_findAttacks.js'
@@ -48,7 +48,7 @@ export default class Detector {
   }
 
   start(): void {
-    let fft = new Tone.FFT(16384);
+    const fft = new Tone.FFT(16384);
     this.mic = new Tone.UserMedia();
     Tone.start()
     this.mic.open().then(() => {
@@ -59,15 +59,15 @@ export default class Detector {
       let fft_gains_normalized: number[] = [];
       let fft_gains_copy_to_remove_peaks: number[] = [];
       let fft_gains_copy_to_remove_expected_peaks: number[] = [];
-      let peak_history: Peak[][] = [];
+      const peak_history: Peak[][] = [];
       let fft_diffs: number[];
       let fft_diff_sum: number;
 
       this.interval = setInterval(() => {
-        let fft_gains = step1_stackOvertones(fft.getValue());
+        const fft_gains = step1_stackOvertones(fft.getValue());
 
-        let fft_peaks = step2_findPeaks(fft_gains.slice(0,2000), 20);
-        let pitch_gains = pitchGains(fft_gains);
+        const fft_peaks = step2_findPeaks(fft_gains.slice(0,2000), 20);
+        const pitch_gains = pitchGains(fft_gains);
 
         if (fft_gains_prev) {
           fft_diffs = fft_gains.map((g, i) => g - fft_gains_prev[i])
@@ -83,22 +83,22 @@ export default class Detector {
           riseThresholdReached = false;
 
           // Normalize to a flat baseline using an logarithmic curve fit
-          let fit = lnCurveFit(fft_gains);
+          const fit = lnCurveFit(fft_gains);
           fft_gains_normalized = normalize(fft_gains, fit.A, fit.B);
           this.debugCallback(`fft norm size ${fft_gains_normalized.length}`);
 
           fft_gains_copy_to_remove_peaks = fft_gains_normalized.slice();
 
-          let max = fftMaxGain(fft_gains_normalized);
+          const max = fftMaxGain(fft_gains_normalized);
 
           // Remove several peaks and their overtones
           let reducedMax = max;
           for (let i = 0; i < 10; i++) {
-            subtractOvertones(fft_gains_copy_to_remove_peaks, reducedMax.index * SCALE, null);
+            subtractOvertones(fft_gains_copy_to_remove_peaks, reducedMax.index * SCALE);
             reducedMax = fftMaxGain(fft_gains_copy_to_remove_peaks);
           }
 
-          let noiseReducedFraction = (reducedMax.gain / max.gain);
+          const noiseReducedFraction = (reducedMax.gain / max.gain);
           let pitchReducedFraction;
 
           if (noiseReducedFraction > 0.45) {
@@ -116,7 +116,7 @@ export default class Detector {
               // this.debugCallback(`freq ${freq.toFixed(2)}`);
               subtractOvertones(fft_gains_copy_to_remove_expected_peaks, freq);
             });
-            let reducedMax = fftMaxGain(fft_gains_copy_to_remove_expected_peaks);
+            const reducedMax = fftMaxGain(fft_gains_copy_to_remove_expected_peaks);
             pitchReducedFraction = (reducedMax.gain / max.gain);
 
             if (pitchReducedFraction < 0.65) {
@@ -145,10 +145,10 @@ export default class Detector {
           attack_pitch_numbers = attack_fft_indices.map(pitchNumForIndex).filter((n) => n !== undefined) as number[]; // TS doesn't see that I'm filtering by undefined
         }
 
-        if (attack_pitch_numbers.length > 0) {
-          const pitch_num = attack_pitch_numbers[0];
-          //this.noteCallback(pitches[pitch_num]);
-        }
+        // if (attack_pitch_numbers.length > 0) {
+        //   const pitch_num = attack_pitch_numbers[0];
+        //   this.noteCallback(pitches[pitch_num]);
+        // }
 
         if (this.fftCallback) {
           this.fftCallback({
