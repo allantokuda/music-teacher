@@ -13,7 +13,7 @@
   let currentNote = measure.notes[currentNoteIndex];
   let heardNote = null;
 
-  let buttonLabel = 'Start';
+  let buttonLabel = 'Play!';
   let isListening = false;
 
   let debugInfo = [];
@@ -121,29 +121,30 @@
   function toggle() {
     if (isListening) {
       stop();
-      buttonLabel = 'Start';
+      buttonLabel = 'Resume';
     } else {
       start();
-      buttonLabel = 'Stop';
+      buttonLabel = 'Pause';
     }
   }
 </script>
 
+<div id="output" class="vexflow" class:hidden={!isListening}>
+  <span class="hidden">{currentNote.pitch_name}</span>
+</div>
 
 <div class="controls">
-  <button on:click={toggle}>
+  <button on:click={toggle} class:startButton={!isListening} class:stopButton={isListening}>
     {buttonLabel}
   </button>
 </div>
+<!--
 <div class="debug-info">
   {#each debugInfo as info}
     <p>{info}</p>
   {/each}
 </div>
-
-<div id="output" class="vexflow">
-  <span class="hidden">{currentNote.pitch_name}</span>
-</div>
+-->
 
 <style>
   .hidden { display: none; }
@@ -159,5 +160,25 @@
     font-size: 12px;
     margin: 0;
     line-height: 1;
+  }
+  .startButton {
+    margin: auto;
+    width: 80vw;
+    height: 80vh;
+    font-size: 50px;
+    background: none;
+    border: none;
+    position: absolute;
+    top: 0; bottom: 0; left: 0; right: 0;
+    background-color: rgba(255,255,255,0.9);
+  }
+  .stopButton {
+    position: absolute;
+    right: 0px;
+    top: 0px;
+    max-width: 100px;
+    padding: 20px 30px;
+    border: none;
+    background: none;
   }
 </style>
