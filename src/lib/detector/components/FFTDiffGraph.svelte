@@ -1,5 +1,5 @@
 <script lang="ts">
-  import { pitchIndices } from '$lib/pitch'
+  export let pitchIndices = [];
   export let fft_diffs = [];
   let history: number[][] = [];
   let diffSum: number[] = [];

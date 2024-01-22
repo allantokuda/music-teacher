@@ -19,7 +19,6 @@ export interface Pitch {
   pitch_num: number;
   pitch_name: string;
   freq: number;
-  fft_index: number;
 }
 
 export interface Measure {

@@ -1,12 +1,12 @@
 <script>
-  import { pitchIndices } from '$lib/pitch'
+  export let pitch_indices = [];
   export let highlight_locations = [];
   export let fft_gains = [];
 
-  function barColor(i, highlight_locations, pitchIndices) {
+  function barColor(i, highlight_locations) {
     if (highlight_locations.includes(i)) {
       return 'red';
-    } else if (pitchIndices.includes(i)) {
+    } else if (pitch_indices.includes(i)) {
       return 'gray';
     /* } else if (i % 100 === 0) { */
     /*   return 'gray'; */
@@ -16,8 +16,8 @@
 
 <div class="graph">
   {#each fft_gains.slice(0,1200) as gain, i}
-    <div class="bar {barColor(i, highlight_locations, pitchIndices)}"
-         style="height: {20+gain}px;">
+    <div class="bar {barColor(i, highlight_locations)}"
+         style="height: {gain}px;">
     </div>
   {/each}
 </div>

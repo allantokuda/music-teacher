@@ -10,6 +10,7 @@
   let data = {};
   let isListening = false;
   let buttonLabel = 'Start';
+  let pitch_indices = [];
 
   if (browser) {
     detector = new Detector();
@@ -21,6 +22,7 @@
 
   function start() {
     detector.start();
+    pitch_indices = detector.pitchIndices;
     isListening = true;
   }
 
@@ -47,9 +49,9 @@
   </button>
 </div>
 
-<PianoGraph pitch_gains={data.pitch_gains} highlight_pitch_numbers={data.attack_pitch_numbers} />
-<FFTGraph highlight_locations={data.attack_fft_indices} fft_gains={data.fft_gains} />
-<FFTGraph highlight_locations={data.attack_fft_indices} fft_gains={data.fft_gains_minus_peaks} />
+<PianoGraph pitch_gains={data.pitch_gains} />
+<FFTGraph pitch_indices={pitch_indices} highlight_locations={data.attack_fft_indices} fft_gains={data.fft_gains} />
+<FFTGraph pitch_indices={pitch_indices} highlight_locations={data.attack_fft_indices} fft_gains={data.fft_gains_minus_peaks} />
 <FFTDiffGraph fft_diffs={data.fft_diffs} />
 
 <style>

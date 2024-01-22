@@ -13,7 +13,7 @@
 
 <div class="piano-graph">
   {#each pitch_gains as gain, n}
-    <div class="bar {pitchColor(n)} {pitchHighlight(n, highlight_pitch_numbers)}" style="height: {400+gain}px;">
+    <div class="bar {pitchColor(n)} {pitchHighlight(n, highlight_pitch_numbers)}" style="height: {gain/5}px;">
       {pitchName(n)}
     </div>
   {/each}

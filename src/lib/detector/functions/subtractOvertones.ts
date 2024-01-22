@@ -1,4 +1,3 @@
-import { SCALE } from "$lib/pitch";
 import type { FFTPoint } from "$lib/types";
 
 const PEAK_STANDARD_DEVIATION_SCALE = 0.015; // multiply this by frequency to get standard deviation of an expected peak's gaussian curve at that frequency
@@ -11,10 +10,9 @@ function gaussian(x: number, mean: number, std: number): number {
 }
 
 // Pass gains array by reference and modify it in place
-function subtractGaussianPeak(fft_gains: number[], freq: number): void {
-  const center_index = Math.round(freq / SCALE);
-  const min_index = Math.round(freq * 0.97 / SCALE);
-  const max_index = Math.round(freq * 1.03 / SCALE);
+function subtractGaussianPeak(fft_gains: number[], center_index: number): void {
+  const min_index = Math.round(center_index * 0.97);
+  const max_index = Math.round(center_index * 1.03);
   if (min_index > fft_gains.length - 1) { return; }
   const center_gain = fft_gains[center_index];
   if (center_gain < 0) { return; }
@@ -24,10 +22,10 @@ function subtractGaussianPeak(fft_gains: number[], freq: number): void {
   }
 }
 
-export default function subtractOvertones(fft_gains: number[], tonic_freq: number): void {
+export default function subtractOvertones(fft_gains: number[], tonic_index: number): void {
   [0.25, 0.5, 1, 2, 3, 4, 5, 6, 7, 8, 9, 10, 11, 12, 13, 14, 15, 16].forEach((multiple) => {
-    const overtone_freq = tonic_freq * multiple;
-    subtractGaussianPeak(fft_gains, overtone_freq);
+    const overtone_index = tonic_index * multiple;
+    subtractGaussianPeak(fft_gains, overtone_index);
   })
 }
 
@@ -43,8 +41,8 @@ export function fftMaxGain(fft_gains: number[]): FFTPoint {
 // LATER: build on this to attempt a determine-the-pitches approach
 // instead of a check-for-specific-pitches approach
 export function findGaussianPeaks(fft_gains: number[]): FFTPoint[] {
-  let peaks: FFTPoint[] = [];
-  let fft_gains_copy = fft_gains.slice();
+  const peaks: FFTPoint[] = [];
+  const fft_gains_copy = fft_gains.slice();
 
   // Loop PEAK_SEARCH_COUNT times:
   // - Find tallest peak in the FFT.
@@ -55,7 +53,7 @@ export function findGaussianPeaks(fft_gains: number[]): FFTPoint[] {
     const peak = fftMaxGain(fft_gains_copy);
     if (peak.gain < SMALL_PEAK_GAIN_THRESHOLD) { break; }
     peaks.push(peak);
-    subtractGaussianPeak(fft_gains_copy, peak.index * SCALE);
+    subtractGaussianPeak(fft_gains_copy, peak.index);
   }
 
   // SEE IF THIS CAN REPLACE THE OTHER NOISE REJECTOR:
