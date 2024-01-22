@@ -8,8 +8,6 @@
 	</main>
 	<footer>
 		<nav>
-			<a href="/">Home</a>
-			|
 			<a href="/play">Play Game</a>
 			|
 			<a href="/detection">Note Detection</a>
