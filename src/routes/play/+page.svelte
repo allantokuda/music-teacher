@@ -1,10 +1,9 @@
 <script lang="ts">
-  import { browser } from '$app/environment';
   import Vex from 'vexflow';
   import Detector from '$lib/detector/Detector.ts';
   import { onDestroy } from 'svelte';
   import Composer from '$lib/composer/Composer';
-  const { Factory, EasyScore, System } = Vex.Flow;
+  const { Factory } = Vex.Flow;
 
   let detector;
   let composer = new Composer();
@@ -68,14 +67,17 @@
       let system = appendSystem(198);
       system.addStave({
         voices: [
-          voice(
-            notes(measure.easyScore, { stem: 'up' }),
-          ),
+          //voice(
+            //notes(measure.easyScore, { stem: 'up' }),
+          //),
         ]
       }).addClef('treble');
 
       system.addStave({
         voices: [
+          voice(
+            notes(measure.easyScore, { stem: 'up', clef: 'bass' }),
+          )
         ]
       }).addClef('bass');
 

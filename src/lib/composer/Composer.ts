@@ -2,7 +2,7 @@ import { pitches } from '$lib/pitch';
 import type { Measure, Pitch } from '$lib/types';
 import PRNG from 'prng';
 
-const cMajorScale = pitches.filter((p) => p.pitch_name.endsWith('4') && !p.pitch_name.includes('#'));
+const cMajorScale = pitches.filter((p) => p.pitch_name.endsWith('3') && !p.pitch_name.includes('#'));
 
 export default class Composer {
   prng: PRNG;
